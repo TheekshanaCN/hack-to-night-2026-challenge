@@ -98,7 +98,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { label: 'DASHBOARD', path: '/dashboard' },
-    { label: 'ACCOUNTS', path: '/accounts' },
+    { label: 'ACCOUNTS', path: '/bank-accounts' },
     { label: 'BANK TRANSFER', path: '/bank-transfer' },
     { label: 'PAY BILLS', path: '/pay-bills' },
     { label: 'SMART SPEND', path: '/smart-spend' },
