@@ -72,10 +72,9 @@ INSERT INTO transactions (from_account, to_account, amount, description, created
 ON CONFLICT DO NOTHING;
 `
 
-export async function runStatement(sql: string) {
+export async function runStatement(sql: string, params?: unknown[]) {
   await ensureDatabase()
-  console.log('[bank-sql]', sql)
-  return pool.query(sql)
+  return pool.query(sql, params as never[])
 }
 
 export async function ensureDatabase() {
@@ -103,9 +102,7 @@ export function serviceFailure(reason: unknown) {
       ok: false,
       message: issue.message,
       code: issue.code,
-      detail: issue.detail,
-      trace: issue.stack,
-      databaseUrl: connectionString
+      detail: issue.detail
     },
     { status: 500 }
   )

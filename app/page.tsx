@@ -11,7 +11,7 @@ export default function Home() {
 
         <nav className="flex flex-wrap justify-center gap-4">
           <Link
-            href="/accounts"
+            href="/bank-accounts"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             Accounts
