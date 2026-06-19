@@ -64,10 +64,13 @@ export default function LoginPage() {
       if (data.ok) {
         router.push('/dashboard')
       } else {
-        setError(data.message ?? 'Face not recognised.')
-        setStep('credentials')
-        // Logout the pending session so it doesn't hang
+        // Show rejection animation inside camera for 2.5 s, then go back
+        setError(data.message ?? 'Face not recognised. Try again.')
         await fetch('/api/auth/logout', { method: 'POST' })
+        setTimeout(() => {
+          setStep('credentials')
+          setError('')
+        }, 2800)
       }
     } catch {
       setError('Network error during face verification.')
@@ -163,6 +166,7 @@ export default function LoginPage() {
                     mode="verify"
                     onDescriptor={handleFaceVerify}
                     onError={(msg) => { setError(msg); setStep('credentials') }}
+                    verifyError={error}
                     prompt={faceLoading ? 'Verifying…' : 'Hold still — scanning your face…'}
                   />
                 </Suspense>

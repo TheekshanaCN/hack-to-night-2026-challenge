@@ -227,15 +227,12 @@ export default function Home() {
                 For your security, please verify your identity before this transfer is processed.
               </p>
 
-              {faceError && (
-                <p className="text-sm font-semibold text-red-600 text-center">{faceError}</p>
-              )}
-
               <Suspense fallback={<div style={{ width: 280, height: 210, borderRadius: 16, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 14 }}>Loading camera…</div>}>
                 <FaceCapture
                   mode="verify"
                   onDescriptor={handleFaceVerified}
                   onError={(msg) => setFaceError(msg)}
+                  verifyError={faceError}
                   prompt="Look at the camera to authorise this transfer"
                 />
               </Suspense>
