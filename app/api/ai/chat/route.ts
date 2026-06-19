@@ -87,7 +87,10 @@ export async function POST(request: Request) {
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user',   content: message },
         ],
-        max_tokens:  100,
+        // GLM-5.2-free is a reasoning model — it spends ~450 tokens on internal
+        // chain-of-thought before writing the JSON content. 600 gives it enough
+        // room to finish thinking and still produce the output.
+        max_tokens:  600,
         temperature: 0,
       }),
     })
@@ -96,8 +99,16 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, message: 'AI service unavailable. Please try again.' }, { status: 502 })
     }
 
-    const aiData = await aiRes.json()
-    const rawText = String(aiData.choices?.[0]?.message?.content ?? '').trim()
+    const aiData  = await aiRes.json()
+    const msg     = aiData.choices?.[0]?.message ?? {}
+    // Reasoning models put final output in `content`; if truncated, fall back
+    // to scanning the `reasoning` field for the last JSON object the model wrote
+    let rawText = String(msg.content ?? '').trim()
+    if (!rawText) {
+      const reasoning = String(msg.reasoning ?? '')
+      const lastBrace = reasoning.lastIndexOf('{')
+      if (lastBrace !== -1) rawText = reasoning.slice(lastBrace)
+    }
 
     // Parse — strip markdown fences the model might add despite instructions
     let parsed: Record<string, unknown>
@@ -107,7 +118,7 @@ export async function POST(request: Request) {
     } catch {
       return Response.json({
         ok: true,
-        reply: 'I didn\'t understand that. Try: "Send 500 to Kasun" or "Pay electricity 2000".',
+        reply: 'I didn\'t quite get that. Try: "Send 500 to Kasun" or "Pay electricity 1500".',
       })
     }
 
