@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Sidebar from '@/components/sidebar'
 
@@ -18,10 +18,18 @@ export default function Home() {
   const [bank, setBank] = useState('')
   const [description, setDescription] = useState('')
   const [errors, setErrors] = useState<Errors>({})
-  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'failure'>(
-    'form'
-  )
+  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'failure'>('form')
   const [confirmation, setConfirmation] = useState<string | null>(null)
+  const [failureMessage, setFailureMessage] = useState('Insufficient funds.')
+  const [fromAccount, setFromAccount] = useState('')
+  const [transferring, setTransferring] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/accounts')
+      .then(r => r.json())
+      .then(d => { if (d.ok && d.accounts?.[0]) setFromAccount(d.accounts[0].account_number) })
+      .catch(() => {})
+  }, [])
 
   function validate() {
     const e: Errors = {}
@@ -49,12 +57,29 @@ export default function Home() {
     }
   }
 
-  function handleTransfer(e: React.FormEvent) {
+  async function handleTransfer(e: React.FormEvent) {
     e.preventDefault()
-    // simulate transfer completion and show success page
-    const conf = String(Math.floor(10000000 + Math.random() * 89999999))
-    setConfirmation(conf)
-    setStep('success' as any)
+    setTransferring(true)
+    try {
+      const res = await fetch('/api/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fromAccount, toAccount: accountNumber, amount: Number(amount), description })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setConfirmation(String(data.transaction?.id ?? '—'))
+        setStep('success')
+      } else {
+        setFailureMessage(data.message ?? 'Transfer failed.')
+        setStep('failure')
+      }
+    } catch {
+      setFailureMessage('Network error. Please try again.')
+      setStep('failure')
+    } finally {
+      setTransferring(false)
+    }
   }
 
   return (
@@ -197,14 +222,16 @@ export default function Home() {
                     onClick={() => setStep('form')}
                     className="next-btn"
                     aria-label="back"
+                    disabled={transferring}
                   >
                     BACK
                   </button>
                   <button
                     onClick={handleTransfer}
                     className="next-btn transfer-btn"
+                    disabled={transferring}
                   >
-                    TRANSFER
+                    {transferring ? 'SENDING…' : 'TRANSFER'}
                   </button>
                 </div>
               </div>
@@ -243,7 +270,7 @@ export default function Home() {
                   Transfer Successful!
                 </h3>
                 <p className="text-center text-sm text-gray-500 mb-10">
-                  Confirmation number : {confirmation}
+                  Transaction ID: #{confirmation}
                 </p>
 
                 <div className="flex justify-center">
@@ -303,9 +330,7 @@ export default function Home() {
                   Transaction Failed!
                 </h3>
                 <p className="text-center text-sm text-gray-500 mb-6">
-                  Insufficient Balance
-                  <br />
-                  Current Balance is: Rs.500
+                  {failureMessage}
                 </p>
 
                 <div className="flex justify-center">
