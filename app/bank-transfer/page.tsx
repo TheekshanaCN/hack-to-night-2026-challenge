@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Image from 'next/image'
 import Sidebar from '@/components/sidebar'
+
+const FaceCapture = lazy(() => import('@/components/FaceCapture'))
 
 type Errors = Partial<{
   amount: string
@@ -18,11 +20,12 @@ export default function Home() {
   const [bank, setBank] = useState('')
   const [description, setDescription] = useState('')
   const [errors, setErrors] = useState<Errors>({})
-  const [step, setStep] = useState<'form' | 'confirm' | 'success' | 'failure'>('form')
+  const [step, setStep] = useState<'form' | 'face' | 'confirm' | 'success' | 'failure'>('form')
   const [confirmation, setConfirmation] = useState<string | null>(null)
   const [failureMessage, setFailureMessage] = useState('Insufficient funds.')
   const [fromAccount, setFromAccount] = useState('')
   const [transferring, setTransferring] = useState(false)
+  const [faceError, setFaceError] = useState('')
 
   useEffect(() => {
     fetch('/api/accounts')
@@ -52,8 +55,28 @@ export default function Home() {
   function handleNext(e: React.FormEvent) {
     e.preventDefault()
     if (validate()) {
-      // show confirmation step first
-      setStep('confirm')
+      // Face ID gate before confirmation
+      setFaceError('')
+      setStep('face')
+    }
+  }
+
+  async function handleFaceVerified(descriptor: number[]) {
+    setFaceError('')
+    try {
+      const res = await fetch('/api/auth/face-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ descriptor, context: 'transaction' })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setStep('confirm')
+      } else {
+        setFaceError(data.message ?? 'Face not recognised. Transfer blocked.')
+      }
+    } catch {
+      setFaceError('Network error during face check.')
     }
   }
 
@@ -197,6 +220,33 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          ) : step === 'face' ? (
+            <div className="transfer-card p-8 flex flex-col items-center gap-6">
+              <h3 className="text-center text-2xl font-semibold">Face ID Required</h3>
+              <p className="text-center text-sm text-gray-500">
+                For your security, please verify your identity before this transfer is processed.
+              </p>
+
+              {faceError && (
+                <p className="text-sm font-semibold text-red-600 text-center">{faceError}</p>
+              )}
+
+              <Suspense fallback={<div style={{ width: 280, height: 210, borderRadius: 16, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 14 }}>Loading camera…</div>}>
+                <FaceCapture
+                  mode="verify"
+                  onDescriptor={handleFaceVerified}
+                  onError={(msg) => setFaceError(msg)}
+                  prompt="Look at the camera to authorise this transfer"
+                />
+              </Suspense>
+
+              <button
+                onClick={() => { setStep('form'); setFaceError('') }}
+                className="text-sm text-gray-400 underline"
+              >
+                ← Cancel transfer
+              </button>
+            </div>
           ) : step === 'confirm' ? (
             <div className="transfer-card p-8">
               <h3 className="text-center text-2xl font-semibold mb-6">

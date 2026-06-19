@@ -21,8 +21,12 @@ CREATE TABLE IF NOT EXISTS users (
   full_name TEXT NOT NULL,
   nic TEXT,
   email TEXT,
+  face_descriptor JSONB DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Add face_descriptor to existing tables on first boot after migration
+ALTER TABLE users ADD COLUMN IF NOT EXISTS face_descriptor JSONB DEFAULT NULL;
 
 CREATE TABLE IF NOT EXISTS accounts (
   id SERIAL PRIMARY KEY,
