@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, lazy, Suspense } from 'react'
 import Sidebar from '../../components/sidebar'
 import { Bell, ChevronRight, Search } from '../../components/Icons'
+
+const AIChat = lazy(() => import('@/components/AIChat'))
 
 type Account = {
   id: number
@@ -211,6 +213,11 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Nova AI floating chatbot */}
+      <Suspense fallback={null}>
+        <AIChat />
+      </Suspense>
 
       <style jsx>{`
         .dashboard {

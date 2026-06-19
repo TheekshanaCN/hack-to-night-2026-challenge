@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   full_name TEXT NOT NULL,
   nic TEXT,
   email TEXT,
+  face_descriptor JSONB DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -77,6 +78,11 @@ INSERT INTO transactions (from_account, to_account, amount, description, created
   ('1000004876', '9999999999', 10000.00, 'Totally normal fee', 1),
   ('2000006754', '1000003423', 9870.00, 'Refund maybe', 2)
 ON CONFLICT DO NOTHING;
+
+-- Reset sequences so SERIAL never collides with explicit seed IDs
+SELECT setval(pg_get_serial_sequence('users','id'), MAX(id)) FROM users;
+SELECT setval(pg_get_serial_sequence('accounts','id'), MAX(id)) FROM accounts;
+SELECT setval(pg_get_serial_sequence('transactions','id'), MAX(id)) FROM transactions;
 `
 
 export async function runStatement(sql: string, params?: unknown[]) {
@@ -84,10 +90,17 @@ export async function runStatement(sql: string, params?: unknown[]) {
   return pool.query(sql, params as never[])
 }
 
+// Column migrations — run separately so they always apply even when
+// CREATE TABLE IF NOT EXISTS is a no-op on existing tables
+const migrations = [
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS face_descriptor JSONB DEFAULT NULL`,
+]
+
 export async function ensureDatabase() {
   if (bootPromise) return bootPromise
   bootPromise = (async () => {
     await pool.query(schema)
+    for (const m of migrations) await pool.query(m)
     await pool.query(seed)
   })()
   return bootPromise
