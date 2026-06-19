@@ -194,7 +194,7 @@ export default function Home() {
                 </div>
                 <div className="flex justify-center gap-4">
                   <button
-                    onClick={() => setStep('failure')}
+                    onClick={() => setStep('form')}
                     className="next-btn"
                     aria-label="back"
                   >

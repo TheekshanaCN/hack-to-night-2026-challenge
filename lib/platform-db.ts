@@ -6,7 +6,7 @@ const connectionString =
 
 export const pool = new Pool({
   connectionString,
-  max: 3
+  max: 20
 })
 
 let booted = false
@@ -53,9 +53,9 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 const seed = `
 INSERT INTO users (id, username, password, role, full_name, nic, email) VALUES
-  (1, 'dilara', 'password123', 'customer', 'Dilara Perera', '200112345678', 'dilara@example.test'),
-  (2, 'kasun', 'kasun', 'customer', 'Kasun Wickramanayake', '199812345678', 'kasun@example.test'),
-  (3, 'admin', 'admin', 'admin', 'Platform Administrator', '000000000000', 'root@example.test')
+  (1, 'dilara', '$argon2id$v=19$m=65536,t=2,p=1$FJ8ehaI9Dk1bpsxy5XB3oI3PQyYRGIJWYjlEpJ1+6mU$slSyidB2Dm3pGBaSBtx0daH0akhqbuQDHv2O2Xyvw18', 'customer', 'Dilara Perera', '200112345678', 'dilara@example.test'),
+  (2, 'kasun', '$argon2id$v=19$m=65536,t=2,p=1$KSIIY4Z/u5RZz7Pbuab3NcuPZHBR73qAp0Uz8rrTj2Q$QDLsaqezp2UqiMYjutCXAaYEWJMX6x9EieImtUZlLno', 'customer', 'Kasun Wickramanayake', '199812345678', 'kasun@example.test'),
+  (3, 'admin', '$argon2id$v=19$m=65536,t=2,p=1$VCTOoc+o4GjWE67+jpRRuPdqWgpB5qH70P2FJ7uIWUs$JNVvzNInRWtvosZpHE/rKPSO1Makba6+/aT2483o/ek', 'admin', 'Platform Administrator', '000000000000', 'root@example.test')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO accounts (user_id, account_number, account_name, balance, pin) VALUES
@@ -72,10 +72,9 @@ INSERT INTO transactions (from_account, to_account, amount, description, created
 ON CONFLICT DO NOTHING;
 `
 
-export async function runStatement(sql: string) {
+export async function runStatement(sql: string, params?: unknown[]) {
   await ensureDatabase()
-  console.log('[bank-sql]', sql)
-  return pool.query(sql)
+  return pool.query(sql, params as never[])
 }
 
 export async function ensureDatabase() {
@@ -103,9 +102,7 @@ export function serviceFailure(reason: unknown) {
       ok: false,
       message: issue.message,
       code: issue.code,
-      detail: issue.detail,
-      trace: issue.stack,
-      databaseUrl: connectionString
+      detail: issue.detail
     },
     { status: 500 }
   )

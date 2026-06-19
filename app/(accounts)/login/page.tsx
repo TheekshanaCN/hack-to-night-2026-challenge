@@ -1,7 +1,43 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AuthButton from '@/components/authButton'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleLogin() {
+    setError('')
+    if (!username || !password) {
+      setError('Please enter your username and password.')
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        router.push('/dashboard')
+      } else {
+        setError(data.message ?? 'Login failed. Please try again.')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <section className="mx-auto flex min-h-[480px] w-full max-w-[1060px] overflow-hidden rounded-[56px] bg-white shadow-[0_1px_3px_0_rgba(0,0,0,0.30),0_4px_8px_3px_rgba(0,0,0,0.15)] lg:min-h-[660px]">
       <aside
@@ -14,7 +50,6 @@ export default function LoginPage() {
           className="size-full object-cover"
           aria-hidden="true"
         />
-
         <div className="absolute inset-0 flex items-center justify-center">
           <img
             src="/loginlogo.png"
@@ -32,9 +67,7 @@ export default function LoginPage() {
 
           <div className="space-y-5">
             <div className="relative">
-              <label className="sr-only" htmlFor="login-account">
-                Account name
-              </label>
+              <label className="sr-only" htmlFor="login-account">Account name</label>
               <img
                 src="/person.png"
                 alt=""
@@ -44,14 +77,15 @@ export default function LoginPage() {
               <input
                 id="login-account"
                 placeholder="Account name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                 className="h-[64px] w-full rounded-[40px] border-0 bg-[#d9d9d9] px-8 pl-20 text-lg text-black shadow-[0_1px_3px_0_rgba(0,0,0,0.30),0_4px_8px_3px_rgba(0,0,0,0.15)] outline-none transition-shadow placeholder:text-black/45 focus:shadow-[0_4px_4px_0_rgba(0,0,0,0.30),0_8px_12px_6px_rgba(0,0,0,0.15)]"
               />
             </div>
 
             <div className="relative">
-              <label className="sr-only" htmlFor="login-password">
-                Password
-              </label>
+              <label className="sr-only" htmlFor="login-password">Password</label>
               <img
                 src="/password.png"
                 alt=""
@@ -62,21 +96,27 @@ export default function LoginPage() {
                 id="login-password"
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                 className="h-[64px] w-full rounded-[40px] border-0 bg-[#d9d9d9] px-8 pl-20 text-lg text-black shadow-[0_1px_3px_0_rgba(0,0,0,0.30),0_4px_8px_3px_rgba(0,0,0,0.15)] outline-none transition-shadow placeholder:text-black/45 focus:shadow-[0_4px_4px_0_rgba(0,0,0,0.30),0_8px_12px_6px_rgba(0,0,0,0.15)]"
               />
             </div>
           </div>
 
+          {error && (
+            <p className="mt-4 text-sm font-semibold text-red-600">{error}</p>
+          )}
+
           <div className="mt-3 text-right">
-            <Link
-              href="/reset-password"
-              className="text-sm font-bold text-black"
-            >
+            <Link href="/reset-password" className="text-sm font-bold text-black">
               Forgot password?
             </Link>
           </div>
 
-          <AuthButton className="mt-8">SIGN IN</AuthButton>
+          <AuthButton className="mt-8" onClick={handleLogin} disabled={loading}>
+            {loading ? 'SIGNING IN…' : 'SIGN IN'}
+          </AuthButton>
 
           <p className="mt-6 text-sm font-bold text-black">
             Don`t have an account?

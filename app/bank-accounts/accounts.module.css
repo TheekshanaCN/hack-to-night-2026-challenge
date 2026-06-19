@@ -1,69 +1,3 @@
-/* ===== ROOT VARIABLES ===== */
-:root {
-  /* Colors */
-  --color-primary: #450043;
-  --color-primary-hover: #5a0058;
-  --color-primary-light: rgba(69, 0, 67, 0.1);
-  --color-secondary: #2563eb;
-  --color-secondary-hover: #1d4ed8;
-  --color-secondary-light: rgba(37, 99, 235, 0.3);
-  
-  --color-background: #f1f1f1;
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-text: #374151;
-  --color-text-light: #6b7280;
-  --color-text-muted: #9ca3af;
-  
-  --color-border: #e5e7eb;
-  --color-border-light: #f0f0f0;
-  --color-shadow: rgba(0, 0, 0, 0.1);
-  --color-shadow-hover: rgba(0, 0, 0, 0.2);
-  
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --color-error-light: rgba(239, 68, 68, 0.1);
-  
-  --color-avatar-bg: #93c5fd;
-  --color-card-border: #3b82f6;
-  --color-hover-bg: #f0f0f0;
-  --color-delete-hover: #fee2e2;
-  
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 0.75rem;
-  --spacing-lg: 1rem;
-  --spacing-xl: 1.5rem;
-  --spacing-2xl: 2rem;
-  --spacing-3xl: 2.5rem;
-  
-  /* Border Radius */
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 25px;
-  --radius-full: 50%;
-  
-  /* Font Sizes */
-  --font-xs: 10px;
-  --font-sm: 12px;
-  --font-md: 14px;
-  --font-lg: 16px;
-  --font-xl: 18px;
-  --font-2xl: 20px;
-  --font-3xl: 22px;
-  --font-4xl: 28px;
-  
-  /* Transitions */
-  --transition-default: all 0.3s ease;
-  
-  /* Layout */
-  --card-width: 520px;
-  --card-height: 190px;
-  --form-width: 650px;
-  --avatar-size: 40px;
-}
-
 /* ===== GLOBAL STYLES ===== */
 .accountsPage {
   width: 100vw;
@@ -440,14 +374,6 @@
 
 /* Tablet */
 @media (max-width: 768px) {
-  :root {
-    --card-width: 100%;
-    --card-height: 160px;
-    --form-width: 100%;
-    --font-4xl: 22px;
-    --font-3xl: 20px;
-  }
-  
   .accountsPage {
     flex-direction: column;
   }
@@ -477,14 +403,6 @@
 
 /* Mobile */
 @media (max-width: 480px) {
-  :root {
-    --card-height: 150px;
-    --avatar-size: 35px;
-    --font-4xl: 20px;
-    --font-xl: 16px;
-    --font-3xl: 18px;
-  }
-  
   .content {
     padding: var(--spacing-lg);
   }
@@ -532,12 +450,6 @@
 
 /* Small Mobile */
 @media (max-width: 360px) {
-  :root {
-    --card-height: 130px;
-    --font-xl: 14px;
-    --font-md: 12px;
-  }
-  
   .accountAvatar {
     width: 50px;
     height: 50px;
@@ -565,12 +477,6 @@
 
 /* Large Screens */
 @media (min-width: 1200px) {
-  :root {
-    --card-width: 580px;
-    --card-height: 200px;
-    --form-width: 700px;
-  }
-  
   .cardsContainer {
     gap: var(--spacing-3xl);
   }
