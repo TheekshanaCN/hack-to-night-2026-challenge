@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Sidebar from '@/components/sidebar'
-import { Search, Bell } from '@/components/Icons'
-import styles from './accounts.module.css'
+import { CreditCard, Lock } from 'lucide-react'
 
 type Account = {
   id: number
@@ -29,7 +27,6 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Edit state
   const [editingAccount, setEditingAccount] = useState<Account | null>(null)
   const [nickname, setNickname] = useState('')
   const [nicknameError, setNicknameError] = useState('')
@@ -87,114 +84,126 @@ export default function AccountsPage() {
     }
   }
 
-  const Header = () => (
-    <header className={styles.contentHeader}>
-      <h1 className={styles.pageTitle}>Accounts</h1>
-      <div className={styles.headerActions}>
-        <Search size={22} />
-        <Bell size={22} />
-        <div className={styles.avatarPlaceholder}>
-          <Image src="/person-logo.png" alt="Profile" width={40} height={40} style={{ objectFit: 'cover', borderRadius: '50%' }} />
-        </div>
-      </div>
-    </header>
-  )
-
   return (
-    <main className={styles.accountsPage}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
       <Sidebar />
-      <section className={styles.content}>
 
-        {/* ===== LIST ===== */}
+      <main style={{ flex: 1, padding: '1.75rem 2rem', overflowY: 'auto' }}>
+        <div className="nova-page-header" style={{ marginBottom: '1.75rem' }}>
+          {screen === 'edit' ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button onClick={cancelEdit} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>←</button>
+              <h1 className="nova-page-title">Edit Account</h1>
+            </div>
+          ) : (
+            <h1 className="nova-page-title">Accounts</h1>
+          )}
+        </div>
+
+        {/* ── LIST ── */}
         {screen === 'list' && (
           <>
-            <Header />
-            <div className={styles.cardsContainer}>
-              {loading ? (
-                <p style={{ color: '#6b7280', padding: '1rem' }}>Loading…</p>
-              ) : accounts.length === 0 ? (
-                <p style={{ color: '#6b7280', padding: '1rem' }}>No accounts found.</p>
-              ) : (
-                accounts.map(account => (
-                  <div key={account.id} className={styles.accountCard}>
-                    <div className={styles.iconEdit} onClick={() => openEdit(account)} title="Edit name">✏️</div>
-                    <div className={styles.accountCardContent}>
-                      <h2 className={styles.accountName}>{account.account_name}</h2>
-                      <div className={styles.accountAvatar}>
-                        <Image src="/account-logo.png" alt="account" width={100} height={100} style={{ objectFit: 'cover', borderRadius: '50%' }} />
-                      </div>
-                      <p className={styles.accountDetails}>
-                        ••{account.account_number.slice(-4)}<br />
-                        Balance: Rs. {fmt(account.balance)}<br />
-                        Nova Bank
-                      </p>
+            {loading ? (
+              <p style={{ color: 'var(--text-muted)', padding: '1rem' }}>Loading…</p>
+            ) : accounts.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', padding: '1rem' }}>No accounts found.</p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                {accounts.map(account => (
+                  <div key={account.id} className="card-nova" style={{ padding: '1.5rem', position: 'relative' }}>
+                    <button
+                      onClick={() => openEdit(account)}
+                      title="Edit name"
+                      style={{
+                        position: 'absolute', top: 14, right: 14,
+                        background: 'var(--surface-2)', border: '1px solid var(--border)',
+                        borderRadius: 8, width: 32, height: 32,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 14,
+                      }}
+                    >✏️</button>
+
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 12,
+                      background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginBottom: 14,
+                    }}>
+                      <CreditCard size={22} color="#fff" />
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
-        )}
 
-        {/* ===== EDIT NICKNAME ===== */}
-        {screen === 'edit' && editingAccount && (
-          <>
-            <Header />
-            <div className={styles.formContainer}>
-              <div className={styles.formCard}>
-                <div className={styles.formHeader}>
-                  <h2 className={styles.formTitle}>Edit Account Name</h2>
-                </div>
-
-                <form onSubmit={handleSaveNickname} className={styles.formFields}>
-                  <div className={styles.formGroup}>
-                    <label>Account Number</label>
-                    <input
-                      type="text"
-                      value={editingAccount.account_number}
-                      disabled
-                      className={styles.inputDisabled}
-                    />
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                      {account.account_name}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, fontFamily: 'monospace' }}>
+                      •••• •••• {account.account_number.slice(-4)}
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>Balance</div>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>Rs. {fmt(account.balance)}</div>
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted)' }}>Nova Bank</div>
                   </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Current Balance</label>
-                    <input
-                      type="text"
-                      value={`Rs. ${fmt(editingAccount.balance)}`}
-                      disabled
-                      className={styles.inputDisabled}
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label htmlFor="nickname">Account Name / Nickname</label>
-                    <input
-                      id="nickname"
-                      type="text"
-                      value={nickname}
-                      onChange={e => { setNickname(e.target.value); setNicknameError('') }}
-                      placeholder="Enter account name"
-                      className={nicknameError ? styles.inputError : ''}
-                    />
-                    {nicknameError && <span className={styles.fieldError}>{nicknameError}</span>}
-                  </div>
-
-                  <div className={styles.formActionsBottom}>
-                    <button type="button" className={styles.btnCancel} onClick={cancelEdit} disabled={saving}>
-                      Cancel
-                    </button>
-                    <button type="submit" className={styles.btnUpdate} disabled={saving}>
-                      {saving ? 'Saving…' : 'UPDATE'}
-                    </button>
-                  </div>
-                </form>
+                ))}
               </div>
-            </div>
+            )}
           </>
         )}
 
-      </section>
-    </main>
+        {/* ── EDIT NICKNAME ── */}
+        {screen === 'edit' && editingAccount && (
+          <div style={{ maxWidth: 480 }}>
+            <form onSubmit={handleSaveNickname} className="card-nova" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="nova-field">
+                <label className="nova-label">Account Number</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    value={editingAccount.account_number}
+                    disabled
+                    className="nova-input"
+                    style={{ paddingRight: 40, opacity: 0.5, cursor: 'not-allowed' }}
+                  />
+                  <Lock size={14} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                </div>
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label">Current Balance</label>
+                <input
+                  value={`Rs. ${fmt(editingAccount.balance)}`}
+                  disabled
+                  className="nova-input"
+                  style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="acc-nickname">Account Name / Nickname</label>
+                <input
+                  id="acc-nickname"
+                  value={nickname}
+                  onChange={e => { setNickname(e.target.value); setNicknameError('') }}
+                  placeholder="Enter account name"
+                  className="nova-input"
+                  style={{ borderColor: nicknameError ? 'var(--error)' : undefined }}
+                />
+                {nicknameError && (
+                  <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4, paddingLeft: 4 }}>{nicknameError}</p>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
+                <button type="button" onClick={cancelEdit} disabled={saving} className="nova-btn nova-btn-ghost" style={{ padding: '10px 20px', fontSize: 13 }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} className="nova-btn nova-btn-primary" style={{ padding: '10px 24px', fontSize: 13, fontWeight: 700 }}>
+                  {saving ? 'Saving…' : 'UPDATE'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </main>
+    </div>
   )
 }

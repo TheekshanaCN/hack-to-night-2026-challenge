@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, lazy, Suspense } from 'react'
-import Image from 'next/image'
 import Sidebar from '@/components/sidebar'
 
 const FaceCapture = lazy(() => import('@/components/FaceCapture'))
@@ -13,7 +12,7 @@ type Errors = Partial<{
   bank: string
 }>
 
-export default function Home() {
+export default function BankTransferPage() {
   const [amount, setAmount] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
   const [accountName, setAccountName] = useState('')
@@ -39,26 +38,18 @@ export default function Home() {
     if (!amount) e.amount = 'Amount is required'
     else if (Number(amount) <= 0 || isNaN(Number(amount)))
       e.amount = 'Enter a valid positive amount'
-
     if (!accountNumber) e.accountNumber = 'Account number is required'
     else if (!/^\d{6,}$/.test(accountNumber))
       e.accountNumber = 'Enter a valid account number'
-
     if (!accountName) e.accountName = 'Account name is required'
-
     if (!bank) e.bank = 'Select a bank'
-
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
   function handleNext(e: React.FormEvent) {
     e.preventDefault()
-    if (validate()) {
-      // Face ID gate before confirmation
-      setFaceError('')
-      setStep('face')
-    }
+    if (validate()) { setFaceError(''); setStep('face') }
   }
 
   async function handleFaceVerified(descriptor: number[]) {
@@ -105,129 +96,118 @@ export default function Home() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-bg-light font-geist p-0">
-      <div className="flex min-h-screen">
-        <Sidebar />
+  function resetForm() {
+    setAmount(''); setAccountNumber(''); setAccountName(''); setBank(''); setDescription('')
+    setErrors({}); setConfirmation(null); setFaceError(''); setStep('form')
+  }
 
-        <main className="flex-1 p-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Bank Transfer</h2>
-            <div className="flex items-center gap-3">
-              <button className="topbar-icon" aria-label="search">
-                <img src="/search.png" alt="search" />
-              </button>
-              <button className="topbar-icon" aria-label="notifications">
-                <img src="/notification.png" alt="notifications" />
-              </button>
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
-                <img
-                  src="/avatar.png"
-                  alt="avatar"
-                  className="w-full h-full object-cover bg-white"
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+      <Sidebar />
+
+      <main style={{ flex: 1, padding: '1.75rem 2rem', overflowY: 'auto' }}>
+        <div className="nova-page-header" style={{ marginBottom: '1.75rem' }}>
+          <h1 className="nova-page-title">Bank Transfer</h1>
+        </div>
+
+        <div style={{ maxWidth: 600 }}>
+
+          {/* ── Step: Form ── */}
+          {step === 'form' && (
+            <form onSubmit={handleNext} className="card-nova" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="tf-amount">Amount (Rs.)</label>
+                <input
+                  id="tf-amount"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="nova-input"
+                  style={{ borderColor: errors.amount ? 'var(--error)' : undefined }}
+                />
+                {errors.amount && <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.amount}</p>}
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="tf-accno">Account Number</label>
+                <input
+                  id="tf-accno"
+                  value={accountNumber}
+                  onChange={e => setAccountNumber(e.target.value)}
+                  placeholder="Enter recipient account number"
+                  className="nova-input"
+                  style={{ borderColor: errors.accountNumber ? 'var(--error)' : undefined }}
+                />
+                {errors.accountNumber && <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.accountNumber}</p>}
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="tf-accname">Account Name</label>
+                <input
+                  id="tf-accname"
+                  value={accountName}
+                  onChange={e => setAccountName(e.target.value)}
+                  placeholder="Recipient full name"
+                  className="nova-input"
+                  style={{ borderColor: errors.accountName ? 'var(--error)' : undefined }}
+                />
+                {errors.accountName && <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.accountName}</p>}
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="tf-bank">Select Bank</label>
+                <select
+                  id="tf-bank"
+                  value={bank}
+                  onChange={e => setBank(e.target.value)}
+                  className="nova-input"
+                  style={{ borderColor: errors.bank ? 'var(--error)' : undefined }}
+                >
+                  <option value="">Choose bank</option>
+                  <option>Nova Bank</option>
+                  <option>First National</option>
+                  <option>Global Trust</option>
+                  <option>Union Bank</option>
+                </select>
+                {errors.bank && <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4 }}>{errors.bank}</p>}
+              </div>
+
+              <div className="nova-field">
+                <label className="nova-label" htmlFor="tf-desc">Description (optional)</label>
+                <textarea
+                  id="tf-desc"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  rows={3}
+                  placeholder="What's this transfer for?"
+                  className="nova-input"
+                  style={{ height: 'auto', resize: 'vertical' }}
                 />
               </div>
-            </div>
-          </div>
-          {step === 'form' ? (
-            <form onSubmit={handleNext} className="transfer-card p-8">
-              <div className="grid grid-cols-12 gap-y-6 gap-x-8 items-center">
-                <label className="col-span-3 text-gray-700">Amount :</label>
-                <div className="col-span-9">
-                  <input
-                    aria-label="amount"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="underline-input"
-                    placeholder=""
-                  />
-                  {errors.amount && (
-                    <div className="text-sm text-red-600 mt-1">
-                      {errors.amount}
-                    </div>
-                  )}
-                </div>
 
-                <label className="col-span-3 text-gray-700">
-                  Account Number :
-                </label>
-                <div className="col-span-9">
-                  <input
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    className="underline-input"
-                  />
-                  {errors.accountNumber && (
-                    <div className="text-sm text-red-600 mt-1">
-                      {errors.accountNumber}
-                    </div>
-                  )}
-                </div>
-
-                <label className="col-span-3 text-gray-700">
-                  Account Name :
-                </label>
-                <div className="col-span-9">
-                  <input
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    className="underline-input"
-                  />
-                  {errors.accountName && (
-                    <div className="text-sm text-red-600 mt-1">
-                      {errors.accountName}
-                    </div>
-                  )}
-                </div>
-
-                <label className="col-span-3 text-gray-700">
-                  Select Bank :
-                </label>
-                <div className="col-span-9">
-                  <select
-                    value={bank}
-                    onChange={(e) => setBank(e.target.value)}
-                    className="underline-input bg-transparent"
-                  >
-                    <option value="">Choose bank</option>
-                    <option>First National</option>
-                    <option>Global Trust</option>
-                    <option>Union Bank</option>
-                  </select>
-                  {errors.bank && (
-                    <div className="text-sm text-red-600 mt-1">
-                      {errors.bank}
-                    </div>
-                  )}
-                </div>
-
-                <label className="col-span-3 text-gray-700">
-                  Description :
-                </label>
-                <div className="col-span-9">
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    className="description-box"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-center mt-10">
-                <button type="submit" className="next-btn">
-                  NEXT
-                </button>
-              </div>
+              <button type="submit" className="nova-btn nova-btn-primary" style={{ width: '100%', height: 48, fontSize: 14, fontWeight: 700, letterSpacing: '0.06em', marginTop: 4 }}>
+                NEXT →
+              </button>
             </form>
-          ) : step === 'face' ? (
-            <div className="transfer-card p-8 flex flex-col items-center gap-6">
-              <h3 className="text-center text-2xl font-semibold">Face ID Required</h3>
-              <p className="text-center text-sm text-gray-500">
-                For your security, please verify your identity before this transfer is processed.
-              </p>
+          )}
 
-              <Suspense fallback={<div style={{ width: 280, height: 210, borderRadius: 16, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 14 }}>Loading camera…</div>}>
+          {/* ── Step: Face ID ── */}
+          {step === 'face' && (
+            <div className="card-nova" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Face ID Required</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
+                  Verify your identity before this transfer is processed.
+                </p>
+              </div>
+
+              {faceError && <div className="nova-alert nova-alert-error" style={{ width: '100%' }}>{faceError}</div>}
+
+              <Suspense fallback={
+                <div style={{ width: 280, height: 210, borderRadius: 16, background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                  Loading camera…
+                </div>
+              }>
                 <FaceCapture
                   mode="verify"
                   onDescriptor={handleFaceVerified}
@@ -237,171 +217,85 @@ export default function Home() {
                 />
               </Suspense>
 
-              <button
-                onClick={() => { setStep('form'); setFaceError('') }}
-                className="text-sm text-gray-400 underline"
-              >
+              <button onClick={() => { setStep('form'); setFaceError('') }} style={{ fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
                 ← Cancel transfer
               </button>
             </div>
-          ) : step === 'confirm' ? (
-            <div className="transfer-card p-8">
-              <h3 className="text-center text-2xl font-semibold mb-6">
-                Confirm Transfer
-              </h3>
-              <div className="bg-white rounded-lg p-6 shadow-lg max-w-xl mx-auto text-center">
-                <p className="mb-4">
-                  Confirm your transfer of <strong>Rs. {amount || '0'}</strong>{' '}
-                  to <strong>{accountName || 'recipient'}</strong>
-                </p>
-                <p className="text-sm text-gray-600 mb-6">
-                  Additional fee of Rs.50 will be charged.
-                </p>
-                <div className="mb-6">
-                  <img
-                    src="/transfer-illustration.png"
-                    alt="illustration"
-                    className="mx-auto"
-                  />
-                </div>
-                <div className="flex justify-center gap-4">
-                  <button
-                    onClick={() => setStep('form')}
-                    className="next-btn"
-                    aria-label="back"
-                    disabled={transferring}
-                  >
-                    BACK
-                  </button>
-                  <button
-                    onClick={handleTransfer}
-                    className="next-btn transfer-btn"
-                    disabled={transferring}
-                  >
-                    {transferring ? 'SENDING…' : 'TRANSFER'}
-                  </button>
-                </div>
+          )}
+
+          {/* ── Step: Confirm ── */}
+          {step === 'confirm' && (
+            <div className="card-nova" style={{ padding: '2rem' }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 24, textAlign: 'center' }}>Confirm Transfer</h3>
+
+              <div style={{ background: 'var(--surface-2)', borderRadius: 14, padding: '1.25rem 1.5rem', marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { label: 'Amount', value: `Rs. ${Number(amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })}` },
+                  { label: 'To Account', value: accountNumber },
+                  { label: 'Account Name', value: accountName },
+                  { label: 'Bank', value: bank },
+                  { label: 'Description', value: description || '—' },
+                  { label: 'Fee', value: 'Rs. 50.00' },
+                ].map(r => (
+                  <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{r.label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{r.value}</span>
+                  </div>
+                ))}
               </div>
-            </div>
-          ) : step === 'success' ? (
-            // success page
-            <div className="transfer-card p-8">
-              <div className="relative">
-                <div className="success-check inside-check">
-                  <svg
-                    viewBox="0 0 120 120"
-                    width="100"
-                    height="100"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <radialGradient id="g" cx="50%" cy="50%">
-                        <stop offset="0%" stopColor="#28a745" />
-                        <stop offset="100%" stopColor="#138a3e" />
-                      </radialGradient>
-                    </defs>
-                    <circle cx="60" cy="60" r="50" fill="#dff7e7" />
-                    <circle cx="60" cy="60" r="40" fill="#10a654" />
-                    <path
-                      d="M38 62 L54 78 L82 42"
-                      stroke="#fff"
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                    />
-                  </svg>
-                </div>
 
-                <h3 className="text-center text-2xl font-semibold mb-4">
-                  Transfer Successful!
-                </h3>
-                <p className="text-center text-sm text-gray-500 mb-10">
-                  Transaction ID: #{confirmation}
-                </p>
-
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => {
-                      // go back to home (reset form)
-                      setAmount('')
-                      setAccountNumber('')
-                      setAccountName('')
-                      setBank('')
-                      setDescription('')
-                      setErrors({})
-                      setConfirmation(null)
-                      setStep('form')
-                    }}
-                    className="transfer-btn success-btn"
-                  >
-                    <span className="mr-3">‹</span> BACK TO HOME
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // failure page
-            <div className="transfer-card p-8">
-              <div className="relative">
-                <div className="success-check inside-check">
-                  <svg
-                    viewBox="0 0 120 120"
-                    width="220"
-                    height="220"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="60" cy="60" r="50" fill="#ffdede" />
-                    <circle cx="60" cy="60" r="40" fill="#ffb6b6" />
-                    <path
-                      d="M60 30 L93 86 L27 86 Z"
-                      fill="#ff4d4f"
-                      stroke="#fff"
-                      strokeWidth="4"
-                      strokeLinejoin="round"
-                    />
-                    <text
-                      x="60"
-                      y="78"
-                      textAnchor="middle"
-                      fontSize="36"
-                      fill="#fff"
-                      fontWeight="700"
-                    >
-                      !
-                    </text>
-                  </svg>
-                </div>
-
-                <h3 className="text-center text-2xl font-semibold mb-4">
-                  Transaction Failed!
-                </h3>
-                <p className="text-center text-sm text-gray-500 mb-6">
-                  {failureMessage}
-                </p>
-
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => {
-                      setAmount('')
-                      setAccountNumber('')
-                      setAccountName('')
-                      setBank('')
-                      setDescription('')
-                      setErrors({})
-                      setConfirmation(null)
-                      setStep('form')
-                    }}
-                    className="transfer-btn success-btn"
-                  >
-                    <span className="mr-3">‹</span> BACK TO HOME
-                  </button>
-                </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => setStep('form')} disabled={transferring} className="nova-btn nova-btn-ghost" style={{ flex: 1, height: 48, fontWeight: 700 }}>
+                  BACK
+                </button>
+                <button onClick={handleTransfer} disabled={transferring} className="nova-btn nova-btn-primary" style={{ flex: 2, height: 48, fontWeight: 700 }}>
+                  {transferring ? 'SENDING…' : 'CONFIRM TRANSFER'}
+                </button>
               </div>
             </div>
           )}
-        </main>
-      </div>
+
+          {/* ── Step: Success ── */}
+          {step === 'success' && (
+            <div className="card-nova" style={{ padding: '3rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, textAlign: 'center' }}>
+              <div style={{
+                width: 80, height: 80, borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--success), #34d399)',
+                boxShadow: '0 0 24px rgba(16,185,129,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 36, color: '#fff',
+              }}>✓</div>
+              <div>
+                <h3 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Transfer Successful!</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>Transaction ID: #{confirmation}</p>
+              </div>
+              <button onClick={resetForm} className="nova-btn nova-btn-primary" style={{ padding: '12px 32px', fontWeight: 700 }}>
+                ← BACK TO HOME
+              </button>
+            </div>
+          )}
+
+          {/* ── Step: Failure ── */}
+          {step === 'failure' && (
+            <div className="card-nova" style={{ padding: '3rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, textAlign: 'center' }}>
+              <div style={{
+                width: 80, height: 80, borderRadius: '50%',
+                background: 'rgba(244,63,94,0.15)', border: '2px solid var(--error)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 36, color: 'var(--error)',
+              }}>✕</div>
+              <div>
+                <h3 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Transaction Failed!</h3>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>{failureMessage}</p>
+              </div>
+              <button onClick={resetForm} className="nova-btn nova-btn-ghost" style={{ padding: '12px 32px', fontWeight: 700 }}>
+                ← TRY AGAIN
+              </button>
+            </div>
+          )}
+
+        </div>
+      </main>
     </div>
   )
 }

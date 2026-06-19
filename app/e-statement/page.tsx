@@ -72,119 +72,113 @@ export default function EStatementPage() {
     .filter(t => t.to_account === selectedAccount)
     .reduce((s, t) => s + Number(t.amount), 0)
 
-  function handlePrint() {
-    window.print()
-  }
-
   return (
-    <div className="min-h-screen bg-bg-light font-geist p-0">
-      <div className="flex min-h-screen">
-        <Sidebar />
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+      <Sidebar />
 
-        <main className="flex-1 p-8 text-black overflow-y-auto">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">E-Statement</h2>
-            <button
-              onClick={handlePrint}
-              style={{ background: '#450043', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1.5rem', cursor: 'pointer', fontWeight: 600 }}
-            >
-              Print / Save PDF
-            </button>
-          </div>
+      <main style={{ flex: 1, padding: '1.75rem 2rem', overflowY: 'auto' }}>
+        <div className="nova-page-header" style={{ marginBottom: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <h1 className="nova-page-title">E-Statement</h1>
+          <button
+            onClick={() => window.print()}
+            className="nova-btn nova-btn-primary"
+            style={{ padding: '9px 20px', fontSize: 13, fontWeight: 600 }}
+          >
+            Print / Save PDF
+          </button>
+        </div>
 
-          <div className="mb-4 rounded-2xl bg-white px-8 py-5 shadow-md">
-            <label className="flex items-center gap-4 text-base font-medium">
-              <span>Account:</span>
-              <select
-                value={selectedAccount}
-                onChange={e => setSelectedAccount(e.target.value)}
-                style={{ border: 'none', borderBottom: '1px solid #333', background: 'transparent', fontSize: 16, outline: 'none', padding: '0 8px 4px' }}
-              >
-                {accounts.map(a => (
-                  <option key={a.account_number} value={a.account_number}>
-                    {a.account_name} — ••{a.account_number.slice(-4)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+        {/* Account selector */}
+        <div className="card-nova" style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <label style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>Account:</label>
+          <select
+            value={selectedAccount}
+            onChange={e => setSelectedAccount(e.target.value)}
+            className="nova-input"
+            style={{ flex: 1, maxWidth: 400 }}
+          >
+            {accounts.map(a => (
+              <option key={a.account_number} value={a.account_number}>
+                {a.account_name} — ••{a.account_number.slice(-4)}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          <div ref={printRef} style={{ background: '#e7e7e7', padding: '2rem', minHeight: 560 }}>
-            <img src="/loginlogo.png" alt="Nova Bank" style={{ width: 86, height: 86, borderRadius: '50%', objectFit: 'cover' }} />
-
-            <div style={{ marginTop: 16, fontSize: 14, lineHeight: 1.6 }}>
-              <h2 style={{ fontWeight: 700 }}>Bank Statement</h2>
-              <p><strong>Account Holder:</strong> {holderName}</p>
-              <p><strong>Account Number:</strong> {selectedAccount}</p>
-              <p><strong>Statement Period:</strong> All transactions</p>
-              <p><strong>Branch:</strong> Colombo Main</p>
+        {/* Summary cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: '1.5rem' }}>
+          {[
+            { label: 'Current Balance', value: currentAccount ? `Rs. ${fmt(currentAccount.balance)}` : '—', color: 'var(--primary)' },
+            { label: 'Total Credits', value: `Rs. ${fmt(totalCredits)}`, color: 'var(--success)' },
+            { label: 'Total Debits', value: `Rs. ${fmt(totalDebits)}`, color: 'var(--error)' },
+            { label: 'Transactions', value: String(transactions.length), color: 'var(--gold)' },
+          ].map(s => (
+            <div key={s.label} className="card-nova" style={{ padding: '1.25rem' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>{s.label}</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
             </div>
+          ))}
+        </div>
 
-            <div style={{ marginTop: 24, fontSize: 14 }}>
-              <h3 style={{ fontWeight: 700 }}>Account Summary</h3>
-              <table style={{ marginTop: 16, width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        {/* Statement header (printable) */}
+        <div ref={printRef} className="card-nova" style={{ padding: '2rem', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20, fontWeight: 800, color: '#fff',
+            }}>N</div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>Nova Bank</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Bank Statement — Colombo Main</div>
+            </div>
+            <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{holderName}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{selectedAccount}</div>
+            </div>
+          </div>
+
+          {/* Transaction table */}
+          {loading ? (
+            <p style={{ color: 'var(--text-muted)', padding: '1rem 0' }}>Loading…</p>
+          ) : transactions.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', padding: '1rem 0' }}>No transactions found.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="nova-table" style={{ width: '100%', minWidth: 680 }}>
                 <thead>
                   <tr>
-                    <th style={{ fontWeight: 400, paddingRight: 16 }}>Current Balance</th>
-                    <th style={{ fontWeight: 400, paddingRight: 16 }}>Total Credits (In)</th>
-                    <th style={{ fontWeight: 400, paddingRight: 16 }}>Total Debits (Out)</th>
-                    <th style={{ fontWeight: 400 }}>Transactions</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Ref ID</th>
+                    <th style={{ textAlign: 'right', color: 'var(--error)' }}>Debit (Rs.)</th>
+                    <th style={{ textAlign: 'right', color: 'var(--success)' }}>Credit (Rs.)</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ paddingTop: 8 }}>Rs. {currentAccount ? fmt(currentAccount.balance) : '—'}</td>
-                    <td style={{ paddingTop: 8, color: '#16a34a' }}>Rs. {fmt(totalCredits)}</td>
-                    <td style={{ paddingTop: 8, color: '#dc2626' }}>Rs. {fmt(totalDebits)}</td>
-                    <td style={{ paddingTop: 8 }}>{transactions.length}</td>
-                  </tr>
+                  {transactions.map(t => {
+                    const isDebit = t.from_account === selectedAccount
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ whiteSpace: 'nowrap' }}>{shortDate(t.created_at)}</td>
+                        <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description ?? '—'}</td>
+                        <td style={{ fontFamily: 'monospace', fontSize: 12 }}>#{t.id}</td>
+                        <td style={{ textAlign: 'right', color: 'var(--error)', fontWeight: 600 }}>{isDebit ? fmt(t.amount) : '—'}</td>
+                        <td style={{ textAlign: 'right', color: 'var(--success)', fontWeight: 600 }}>{!isDebit ? fmt(t.amount) : '—'}</td>
+                        <td>
+                          <span className={`nova-badge nova-badge-${t.status === 'completed' ? 'success' : 'warning'}`}>{t.status}</span>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
-
-            <div style={{ marginTop: 32, borderTop: '1px solid #333', paddingTop: 24 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700 }}>Transaction Details</h3>
-              {loading ? (
-                <p style={{ marginTop: 16, color: '#666' }}>Loading…</p>
-              ) : (
-                <div style={{ overflowX: 'auto', marginTop: 16 }}>
-                  <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid #333' }}>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '13%' }}>Date</th>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '28%' }}>Description</th>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '18%' }}>Ref ID</th>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '15%' }}>Debit (Rs.)</th>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '15%' }}>Credit (Rs.)</th>
-                        <th style={{ paddingBottom: 8, fontWeight: 400, width: '11%' }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.length === 0 ? (
-                        <tr><td colSpan={6} style={{ paddingTop: 24, color: '#666' }}>No transactions found.</td></tr>
-                      ) : (
-                        transactions.map(t => {
-                          const isDebit = t.from_account === selectedAccount
-                          return (
-                            <tr key={t.id} style={{ borderBottom: '1px solid #ccc' }}>
-                              <td style={{ padding: '8px 0' }}>{shortDate(t.created_at)}</td>
-                              <td style={{ padding: '8px 0' }}>{t.description ?? '—'}</td>
-                              <td style={{ padding: '8px 0' }}>#{t.id}</td>
-                              <td style={{ padding: '8px 0', color: '#dc2626' }}>{isDebit ? fmt(t.amount) : '—'}</td>
-                              <td style={{ padding: '8px 0', color: '#16a34a' }}>{!isDebit ? fmt(t.amount) : '—'}</td>
-                              <td style={{ padding: '8px 0' }}>{t.status}</td>
-                            </tr>
-                          )
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        </main>
-      </div>
+          )}
+        </div>
+      </main>
     </div>
   )
 }
