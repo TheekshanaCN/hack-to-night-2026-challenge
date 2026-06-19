@@ -55,13 +55,13 @@ export async function POST(request: Request) {
     const headers = new Headers()
     headers.append('set-cookie', sessionCookie(sessionId))
 
-    // Tell the client whether face verification is needed
     const hasFaceId = Boolean(user.face_descriptor)
 
     return Response.json(
       {
         ok: true,
-        requireFaceId: hasFaceId,
+        requireFaceId:    hasFaceId,   // has face → must verify it
+        requireFaceSetup: !hasFaceId,  // no face  → must enrol first
         user: { id: user.id, username: user.username, role: user.role, fullName: user.full_name }
       },
       { headers }
