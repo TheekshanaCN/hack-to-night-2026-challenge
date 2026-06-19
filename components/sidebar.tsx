@@ -2,96 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-
-// Minimal icon components to avoid external dependency
-type IconProps = { size?: number }
-const LayoutGrid = ({ size = 18 }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect
-      x="3"
-      y="3"
-      width="8"
-      height="8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <rect
-      x="13"
-      y="3"
-      width="8"
-      height="8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <rect
-      x="3"
-      y="13"
-      width="8"
-      height="8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <rect
-      x="13"
-      y="13"
-      width="8"
-      height="8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-  </svg>
-)
-
-const Settings = ({ size = 24 }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 2.28 16.9l.06-.06c.45-.45.58-1.1.33-1.82a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.27-.4 1.51-1a1.65 1.65 0 0 0-.33-1.82L4.3 4.3A2 2 0 1 1 7.12 1.47l.06.06c.45.45 1.1.58 1.82.33.6-.25 1.26-.25 1.86 0 .72.25 1.37.12 1.82-.33l.06-.06A2 2 0 1 1 19.7 4.3l-.06.06c-.45.45-.58 1.1-.33 1.82.25.6.25 1.26 0 1.86a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83l-.06.06z"
-      stroke="currentColor"
-      strokeWidth="1"
-    />
-  </svg>
-)
-
-const HelpCircle = ({ size = 24 }: IconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
-    <path
-      d="M12 17h.01"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M9.5 10a2.5 2.5 0 1 1 5 0c0 1.75-2 2.25-2 3.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-)
+import {
+  LayoutGrid, CreditCard, ArrowLeftRight, Receipt,
+  PieChart, FileText, Settings, HelpCircle, LogOut
+} from 'lucide-react'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -103,220 +17,70 @@ export default function Sidebar() {
   }
 
   const menuItems = [
-    { label: 'DASHBOARD', path: '/dashboard' },
-    { label: 'ACCOUNTS', path: '/bank-accounts' },
-    { label: 'BANK TRANSFER', path: '/bank-transfer' },
-    { label: 'PAY BILLS', path: '/pay-bills' },
-    { label: 'SMART SPEND', path: '/smart-spend' },
-    { label: 'E-STATEMENT', path: '/e-statement' }
+    { label: 'Dashboard',      path: '/dashboard',     icon: LayoutGrid },
+    { label: 'Accounts',       path: '/bank-accounts', icon: CreditCard },
+    { label: 'Bank Transfer',  path: '/bank-transfer', icon: ArrowLeftRight },
+    { label: 'Pay Bills',      path: '/pay-bills',     icon: Receipt },
+    { label: 'Smart Spend',    path: '/smart-spend',   icon: PieChart },
+    { label: 'E-Statement',    path: '/e-statement',   icon: FileText },
   ]
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-top">
-        {/* Logo */}
-        <div className="logo-wrapper">
-          <img src="/loginlogo.png" alt="logo" className="logo-img" />
-          <h1 className="brand-name">NOVA BANK</h1>
+    <aside className="nova-sidebar">
+      {/* Logo */}
+      <div style={{ padding: '1.75rem 1.25rem 1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+            boxShadow: '0 0 16px rgba(124,58,237,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 18, fontWeight: 800, color: '#fff',
+          }}>N</div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>NOVA BANK</div>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.12em', fontWeight: 600 }}>BANKING</div>
+          </div>
         </div>
-
-        {/* Menu */}
-        <nav className="menu">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.path
-            return (
-              <Link key={item.label} href={item.path} className="menu-link">
-                <button className={`menu-item ${isActive ? 'active' : ''}`}>
-                  {item.label === 'DASHBOARD' && <LayoutGrid size={18} />}
-                  {item.label}
-                </button>
-              </Link>
-            )
-          })}
-        </nav>
       </div>
 
-      <div className="sidebar-footer">
-        <Link href="/profile" title="Profile & Settings">
-          <Settings size={24} />
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '0.5rem 0.75rem', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {menuItems.map(({ label, path, icon: Icon }) => (
+          <Link key={path} href={path} className={`nova-nav-item${pathname === path ? ' active' : ''}`}>
+            <Icon size={17} />
+            {label}
+          </Link>
+        ))}
+      </nav>
+
+      {/* Divider */}
+      <div style={{ margin: '0 1rem', height: 1, background: 'var(--border)' }} />
+
+      {/* Footer */}
+      <div style={{ padding: '1rem 1.25rem', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <Link href="/profile" title="Profile & Settings" style={{
+          width: 38, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.2s',
+        }}>
+          <Settings size={16} />
         </Link>
-        <HelpCircle size={24} />
-        <button onClick={handleLogout} className="logout-btn" title="Logout">
-          <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
+        <button title="Help" style={{
+          width: 38, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          color: 'var(--text-secondary)', cursor: 'pointer',
+        }}>
+          <HelpCircle size={16} />
+        </button>
+        <button onClick={handleLogout} title="Logout" style={{
+          width: 38, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          color: 'var(--error)', cursor: 'pointer', marginLeft: 'auto',
+        }}>
+          <LogOut size={16} />
         </button>
       </div>
-
-      <style jsx>{`
-        .sidebar {
-          width: 250px;
-          background: #450043;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          border-radius: 0 25px 25px 0;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          flex-shrink: 0;
-        }
-
-        .sidebar-top {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .logo-wrapper {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 1rem 0.75rem;
-        }
-
-        .logo-img {
-          width: 75px;
-          height: 75px;
-          border-radius: 50%;
-          background: white;
-          object-fit: cover;
-        }
-
-        .brand-name {
-          color: white;
-          font-size: 18px;
-          font-weight: 800;
-          letter-spacing: 0.5px;
-        }
-
-        .menu {
-          margin-top: 3rem;
-          padding: 0 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .menu-link {
-          text-decoration: none;
-        }
-
-        .menu-item {
-          height: 50px;
-          border: none;
-          background: transparent;
-          color: white;
-          text-align: left;
-          padding: 0 1.5rem;
-          border-radius: 25px;
-          transition: all 0.3s;
-          font-weight: 600;
-          font-size: 0.9rem;
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          cursor: pointer;
-          width: 100%;
-        }
-
-        .menu-item.active {
-          background: #9a5c97;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .menu-item:hover {
-          background: #9a5c97;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-footer {
-          display: flex;
-          gap: 1.5rem;
-          padding: 1.5rem;
-          color: white;
-          align-items: center;
-        }
-
-        .logout-btn {
-          background: transparent;
-          border: none;
-          color: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          opacity: 0.8;
-          transition: opacity 0.2s;
-          padding: 0;
-        }
-
-        .logout-btn:hover {
-          opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-          .sidebar {
-            width: 100%;
-            border-radius: 0 0 25px 25px;
-            flex-direction: row;
-            flex-wrap: wrap;
-            padding: 0.75rem 1rem;
-            align-items: center;
-          }
-
-          .sidebar-top {
-            flex-direction: row;
-            align-items: center;
-            gap: 1rem;
-            flex: 1;
-          }
-
-          .logo-wrapper {
-            padding: 0;
-          }
-          .logo-img {
-            width: 50px;
-            height: 50px;
-          }
-          .brand-name {
-            font-size: 16px;
-          }
-
-          .menu {
-            flex-direction: row;
-            flex-wrap: wrap;
-            margin-top: 0;
-            padding: 0;
-            gap: 0.5rem;
-          }
-          .menu-item {
-            padding: 0 1rem;
-            height: 40px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            width: auto;
-          }
-
-          .sidebar-footer {
-            padding: 0;
-            gap: 1rem;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .menu-item {
-            font-size: 0.7rem;
-            padding: 0 0.75rem;
-            height: 34px;
-          }
-          .brand-name {
-            font-size: 14px;
-          }
-          .logo-img {
-            width: 40px;
-            height: 40px;
-          }
-        }
-      `}</style>
     </aside>
   )
 }

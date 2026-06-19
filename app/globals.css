@@ -1,234 +1,343 @@
 @import "tailwindcss";
 
+/* ── Nova Bank Premium Design System ────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background:   #09090f;
+  --surface-1:    #111118;
+  --surface-2:    #1a1a28;
+  --surface-3:    #222235;
+  --border:       rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --primary:       #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-glow:  rgba(124,58,237,0.25);
+  --primary-fg:    #ffffff;
+  --gold:          #f59e0b;
+  --gold-light:    rgba(245,158,11,0.12);
+  --text-primary:   #f4f4ff;
+  --text-secondary: rgba(244,244,255,0.6);
+  --text-muted:     rgba(244,244,255,0.35);
+  --success:    #10b981;
+  --success-bg: rgba(16,185,129,0.12);
+  --error:      #f43f5e;
+  --error-bg:   rgba(244,63,94,0.12);
+  --warning:    #f59e0b;
+  --warning-bg: rgba(245,158,11,0.12);
+  --sidebar-bg:    #0a0a12;
+  --sidebar-width: 230px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-glow: 0 0 60px rgba(124,58,237,0.18);
+  /* keep legacy aliases */
+  --sidebar-purple: #0a0a12;
+  --sidebar-accent: #7c3aed;
+  --card-bg: #111118;
+  --bg-light: #09090f;
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-success: #10b981;
+  --color-error: #f43f5e;
+  --color-border: rgba(255,255,255,0.07);
+  --color-text: #f4f4ff;
+  --color-text-light: rgba(244,244,255,0.6);
+  --color-text-muted: rgba(244,244,255,0.35);
+  --color-background: #09090f;
+  --color-white: #111118;
+  --color-black: #f4f4ff;
+  --foreground: #f4f4ff;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground: var(--text-primary);
+  --color-primary:    var(--primary);
+  --color-surface-1:  var(--surface-1);
+  --color-surface-2:  var(--surface-2);
+  --color-border:     var(--border);
+  --color-gold:       var(--gold);
+  --color-success:    var(--success);
+  --color-error:      var(--error);
+  --font-sans:        var(--font-geist-sans);
+  --font-mono:        var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+*,::before,::after { box-sizing: border-box; }
 
-body {
+html,body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-bai, 'Bai Jamjuree'), Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-bai,'Bai Jamjuree'),system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-:root {
-  --sidebar-purple: rgba(58,6,59,0.83);
-  --sidebar-accent: #b886b6;
-  --card-bg: #ffffff;
-  --bg-light: #f3f2f2;
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.35); border-radius: 99px; }
 
-  /* accounts module variables */
-  --color-primary: #450043;
-  --color-primary-hover: #5a0058;
-  --color-primary-light: rgba(69, 0, 67, 0.1);
-  --color-secondary: #2563eb;
-  --color-secondary-hover: #1d4ed8;
-  --color-secondary-light: rgba(37, 99, 235, 0.3);
-  --color-background: #f1f1f1;
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-text: #374151;
-  --color-text-light: #6b7280;
-  --color-text-muted: #9ca3af;
-  --color-border: #e5e7eb;
-  --color-border-light: #f0f0f0;
-  --color-shadow: rgba(0, 0, 0, 0.1);
-  --color-shadow-hover: rgba(0, 0, 0, 0.2);
-  --color-success: #22c55e;
-  --color-error: #ef4444;
-  --color-error-light: rgba(239, 68, 68, 0.1);
-  --color-avatar-bg: #93c5fd;
-  --color-card-border: #3b82f6;
-  --color-hover-bg: #f0f0f0;
-  --color-delete-hover: #fee2e2;
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 0.75rem;
-  --spacing-lg: 1rem;
-  --spacing-xl: 1.5rem;
-  --spacing-2xl: 2rem;
-  --spacing-3xl: 2.5rem;
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 25px;
-  --radius-full: 50%;
-  --font-xs: 10px;
-  --font-sm: 12px;
-  --font-md: 14px;
-  --font-lg: 16px;
-  --font-xl: 18px;
-  --font-2xl: 20px;
-  --font-3xl: 22px;
-  --font-4xl: 28px;
-  --transition-default: all 0.3s ease;
-  --card-width: 520px;
-  --card-height: 190px;
-  --form-width: 650px;
-  --avatar-size: 40px;
+/* ── Layout helpers ──────────────────────────────────────────────────────── */
+.font-geist { font-family: var(--font-bai,'Bai Jamjuree'),ui-sans-serif,system-ui }
+.bg-bg-light { background: var(--background) }
+.nova-page  { display:flex; min-height:100vh; background:var(--background); }
+.nova-main  { flex:1; overflow-y:auto; padding:2rem 2.5rem; min-width:0; }
+.nova-page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; flex-wrap:wrap; gap:1rem; }
+.nova-page-title  { font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-0.4px; }
+
+/* ── Glass / Card ────────────────────────────────────────────────────────── */
+.glass {
+  background: rgba(17,17,24,0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+}
+.card-nova {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.card-nova-hover {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.card-nova-hover:hover {
+  border-color: rgba(124,58,237,0.3);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(124,58,237,0.1);
+  transform: translateY(-1px);
 }
 
-@media (max-width: 768px) {
-  :root {
-    --card-width: 100%;
-    --card-height: 160px;
-    --form-width: 100%;
-    --font-4xl: 22px;
-    --font-3xl: 20px;
-  }
+/* ── Gradients ───────────────────────────────────────────────────────────── */
+.gradient-primary { background: linear-gradient(135deg,#7c3aed 0%,#5b21b6 60%,#3b0764 100%); }
+.gradient-gold    { background: linear-gradient(135deg,#f59e0b 0%,#d97706 100%); }
+.text-gradient    { background:linear-gradient(135deg,#c4b5fd,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.glow-primary     { box-shadow:0 0 30px var(--primary-glow),0 4px 24px rgba(0,0,0,0.4); }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.nova-sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.625rem;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.nova-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nova-nav-item:hover { background:rgba(124,58,237,0.08); color:var(--text-primary); border-color:rgba(124,58,237,0.1); }
+.nova-nav-item.active { background:rgba(124,58,237,0.15); color:#c4b5fd; border-color:rgba(124,58,237,0.25); }
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+.nova-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px 15px;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+.nova-input::placeholder { color: var(--text-muted); }
+.nova-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+.nova-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.nova-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px 22px; border-radius: var(--radius-md);
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all 0.2s; border: none; letter-spacing: 0.3px;
+}
+.nova-btn-primary {
+  background: linear-gradient(135deg,#7c3aed,#5b21b6);
+  color: #fff; box-shadow: 0 4px 16px rgba(124,58,237,0.35);
+}
+.nova-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+  box-shadow: 0 6px 24px rgba(124,58,237,0.45);
+  transform: translateY(-1px);
+}
+.nova-btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.nova-btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.nova-btn-ghost:hover:not(:disabled) { background:rgba(255,255,255,0.05); color:var(--text-primary); border-color:var(--border-hover); }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+.nova-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:99px; font-size:10px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; }
+.nova-badge-success { background:var(--success-bg); color:var(--success); }
+.nova-badge-error   { background:var(--error-bg);   color:var(--error); }
+.nova-badge-warning { background:var(--warning-bg); color:var(--warning); }
+.nova-badge-primary { background:var(--primary-glow); color:#c4b5fd; }
+
+/* ── Alerts ──────────────────────────────────────────────────────────────── */
+.nova-alert { padding:11px 15px; border-radius:var(--radius-md); font-size:13px; font-weight:500; border:1px solid; }
+.nova-alert-success { background:var(--success-bg); color:var(--success); border-color:rgba(16,185,129,0.2); }
+.nova-alert-error   { background:var(--error-bg);   color:var(--error);   border-color:rgba(244,63,94,0.2); }
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.nova-table { width:100%; border-collapse:collapse; }
+.nova-table th { text-align:left; padding:10px 14px; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--border); }
+.nova-table td { padding:13px 14px; font-size:13px; color:var(--text-secondary); border-bottom:1px solid rgba(255,255,255,0.035); }
+.nova-table tr:hover td { background:rgba(124,58,237,0.04); }
+.nova-table tr:last-child td { border-bottom:none; }
+
+/* ── Form helpers ────────────────────────────────────────────────────────── */
+.nova-field  { display:flex; flex-direction:column; gap:5px; }
+.nova-label  { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+.nova-divider { height:1px; background:var(--border); margin:1.25rem 0; }
+
+/* ── Auth pages ──────────────────────────────────────────────────────────── */
+.auth-shell {
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  /* subtle radial bg glow */
+  background-image: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 70%);
+}
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+  padding: 2.25rem;
+  animation: nova-fade-up 0.35s ease forwards;
 }
 
-@media (max-width: 480px) {
-  :root {
-    --card-height: 150px;
-    --avatar-size: 35px;
-    --font-4xl: 20px;
-    --font-xl: 16px;
-    --font-3xl: 18px;
-  }
+/* ── Transfer / bank pages ───────────────────────────────────────────────── */
+.transfer-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.underline-input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 4px;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.underline-input:focus { border-bottom-color: var(--primary); }
+.underline-input::placeholder { color: var(--text-muted); }
+.underline-input option { background: var(--surface-2); color: var(--text-primary); }
+
+.description-box {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+}
+.description-box:focus { border-color: var(--primary); }
+
+.next-btn {
+  background: linear-gradient(135deg,#7c3aed,#5b21b6);
+  color: #fff; padding: 11px 34px; border-radius: 99px;
+  font-weight: 700; font-size: 13px; border: none; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35); transition: all 0.2s; letter-spacing: 0.5px;
+}
+.next-btn:hover:not(:disabled) { box-shadow:0 6px 24px rgba(124,58,237,0.45); transform:translateY(-1px); }
+.next-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+.transfer-btn {
+  background: linear-gradient(135deg,#7c3aed,#5b21b6);
+  color: #fff; border: none; border-radius: 99px; padding: 12px 36px;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.35); transition: all 0.2s;
+}
+.transfer-btn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 24px rgba(124,58,237,0.45); }
+.transfer-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+.success-btn {
+  background: linear-gradient(135deg,#10b981,#059669);
+  color: #fff; border: none; border-radius: 99px; padding: 12px 32px;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16,185,129,0.3); transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 8px;
 }
 
-@media (max-width: 360px) {
-  :root {
-    --card-height: 130px;
-    --font-xl: 14px;
-    --font-md: 12px;
-  }
+.topbar-icon {
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-secondary); display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
 }
+.topbar-icon:hover { background:var(--surface-3); color:var(--text-primary); }
+.topbar-icon img { width:16px; height:16px; object-fit:contain; display:block; filter:invert(0.65); }
 
-@media (min-width: 1200px) {
-  :root {
-    --card-width: 580px;
-    --card-height: 200px;
-    --form-width: 700px;
-  }
+.success-check { display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; width:88px; height:88px; }
+.success-check.inside-check { position:relative; top:0; left:0; transform:none; }
+.success-check svg { width:100%; height:100%; }
+
+/* ── Transfer card text colors ───────────────────────────────────────────── */
+.transfer-card label { color: var(--text-secondary) !important; font-size:13px; }
+.transfer-card select { background:var(--surface-2); }
+
+/* ── Sidebar legacy aliases ──────────────────────────────────────────────── */
+.bg-sidebar-purple { background: var(--sidebar-bg); border-radius:var(--radius-lg); overflow:hidden; }
+.sidebar-item { padding:9px 12px; border-radius:var(--radius-md); color:var(--text-muted); transition:all 0.15s; display:flex; align-items:center; gap:9px; text-transform:uppercase; font-weight:600; letter-spacing:0.5px; font-size:12px; }
+.sidebar-item:hover { background:rgba(124,58,237,0.08); color:var(--text-primary); }
+.sidebar-item.active { background:rgba(124,58,237,0.15); color:#c4b5fd; }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes nova-fade-up {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
 }
-
-.font-geist{font-family: var(--font-bai, 'Bai Jamjuree'), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
-
-.bg-bg-light{background-color:var(--bg-light)}
-.bg-sidebar-purple{background:var(--sidebar-purple);border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.12)}
-.text-sidebar-purple{color:var(--sidebar-purple)}
-
-.transfer-card{
-  background: var(--card-bg);
-  border-radius: 18px;
-  box-shadow: 0 22px 50px rgba(0,0,0,0.12);
-  max-width: 960px;
-  margin: 18px auto;
-  padding: 140px 48px 40px;
-  position: relative;
-  max-height: none;
-  overflow: visible;
-  border: 1px solid rgba(0,0,0,0.04);
+@keyframes nova-pulse-glow {
+  0%,100% { box-shadow:0 0 20px var(--primary-glow); }
+  50%      { box-shadow:0 0 40px var(--primary-glow); }
 }
-
-.underline-input{
-  width:100%;
-  border:0;
-  border-bottom:2px solid #cfcfcf;
-  padding:8px 4px;
-  outline:none;
-  font-size:16px;
+@keyframes nova-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
 }
-.underline-input:focus{border-bottom-color:var(--sidebar-accent)}
-
-.description-box{
-  width:100%;
-  border:1px solid #cfcfcf;
-  padding:8px;
-  border-radius:2px;
-}
-
-.next-btn{
-  background:var(--sidebar-accent);
-  color:white;
-  padding:18px 48px;
-  border-radius:28px;
-  font-weight:700;
-  box-shadow: 0 8px 18px rgba(90,39,64,0.2);
-  border:none;
-}
-
-.sidebar-item{padding:14px 18px;border-radius:12px;color:rgba(255,255,255,0.95);transition:all 200ms cubic-bezier(.2,.9,.2,1);display:flex;align-items:center;gap:14px;text-transform:uppercase;font-weight:600;letter-spacing:1px}
-.sidebar-item:hover{background:rgba(255,255,255,0.03);transform:translateY(-3px)}
-.sidebar-item .sidebar-icon{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:transparent}
-.sidebar-item.active{background: linear-gradient(180deg, rgba(196,150,185,0.95), rgba(169,111,150,0.95));font-weight:900;color:#ffffff;box-shadow: 0 20px 40px rgba(58,6,59,0.35), inset 0 -6px 0 rgba(255,255,255,0.06);transform:translateY(-6px);padding-left:20px;padding-right:28px}
-.sidebar-item.active .sidebar-icon{background:rgba(255,255,255,0.06);box-shadow:0 10px 20px rgba(0,0,0,0.18);border-radius:12px}
-.sidebar-item.active svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:1.6}
-.icon-btn{background:rgba(255,255,255,0.04);border:none;color:white;font-size:18px;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%}
-.icon-btn svg{width:20px;height:20px;display:block;fill:currentColor;stroke:currentColor}
-
-/* Ensure form labels and inputs inside the transfer card are dark/visible */
-.transfer-card label,
-.transfer-card input,
-.transfer-card select,
-.transfer-card textarea,
-.underline-input,
-.description-box{color:#000}
-
-/* Ensure all text inside transfer/confirm cards is black and highly visible */
-.transfer-card,
-.transfer-card * {
-  color: #000 !important;
-}
-
-/* Ensure transfer buttons remain white even when global card text is forced black */
-.transfer-card .next-btn,
-.transfer-card .transfer-btn {
-  color: #fff !important;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.12);
-}
-
-
-/* Allow confirm illustration and inner panel to fully display */
-.transfer-card img{max-width:420px;max-height:340px;width:auto;height:auto}
-
-/* inner confirm panel styling (rounded, elevated) */
-.transfer-card .bg-white{background:#f3f5f6;border-radius:14px;box-shadow:0 20px 40px rgba(12,12,12,0.06);max-width:760px;margin:0 auto;padding:32px}
-
-.transfer-card h3{font-size:26px;font-weight:900;text-align:center;margin-bottom:18px}
-
-/* ensure headings below the overlapping graphic are visible */
-.transfer-card > .relative > h3{margin-top:6px}
-
-/* transfer button variant styled as large pill overlapping panel */
-.transfer-btn{width:420px;height:72px;border-radius:36px;background:linear-gradient(180deg,#b886b6,#9b5f90);color:#fff;font-weight:900;font-size:20px;letter-spacing:2px;box-shadow:0 22px 28px rgba(90,39,64,0.25);border:none;margin-top:24px;display:block;margin-left:auto;margin-right:auto}
-.transfer-btn:active{transform:translateY(1px)}
-
-/* slightly adjust generic next button */
-.next-btn{padding:14px 40px}
-
-/* Make main headings clearly visible */
-main h2{color:#000;font-size:28px;font-weight:800}
-
-/* success page specifics */
-.success-check{display:flex;align-items:center;justify-content:center;position:absolute;top:-120px;left:50%;transform:translateX(-50%);z-index:40;width:220px;height:220px}
-.success-check svg{display:block;margin:0 auto;width:100%;height:100%}
-.success-btn{width:420px;background:linear-gradient(180deg,#b886b6,#9b5f90);height:64px;border-radius:32px;color:#fff;font-weight:800;font-size:18px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 18px 28px rgba(90,39,64,0.22);border:none;margin-top:28px}
-.success-btn span{font-size:22px;margin-right:12px}
-
-/* Variant: place the alert/check inside the card flow (no overlap) */
-.success-check.inside-check{position:relative;top:0;left:0;transform:none;margin:20px auto 40px;width:100px;height:100px;z-index:10;display:block}
-.success-check.inside-check svg{width:100%;height:100%}
-
-/* Topbar icons (right side) */
-.topbar-icon{background:transparent;border:none;color:var(--foreground);display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px}
-.topbar-icon svg{width:22px;height:22px;fill:none;stroke:currentColor}
-.topbar-icon:hover{background:rgba(0,0,0,0.04)}
-
-/* Ensure PNG icons inside topbar buttons are sized and centered */
-.topbar-icon img{width:20px;height:20px;object-fit:contain;display:block}
+.animate-fade-up    { animation: nova-fade-up 0.35s ease forwards; }
+.animate-pulse-glow { animation: nova-pulse-glow 2s ease-in-out infinite; }

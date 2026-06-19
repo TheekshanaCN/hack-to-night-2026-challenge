@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/sidebar'
+import { Lock } from 'lucide-react'
 
 type Profile = {
   username: string
@@ -21,14 +22,12 @@ export default function ProfilePage() {
   const [profile, setProfile]   = useState<Profile | null>(null)
   const [loading, setLoading]   = useState(true)
 
-  // Info form
   const [fullName, setFullName] = useState('')
   const [email, setEmail]       = useState('')
   const [nic, setNic]           = useState('')
   const [infoSaving, setInfoSaving] = useState(false)
   const [infoMsg, setInfoMsg]   = useState<{ ok: boolean; text: string } | null>(null)
 
-  // Password form
   const [curPwd, setCurPwd]     = useState('')
   const [newPwd, setNewPwd]     = useState('')
   const [conPwd, setConPwd]     = useState('')
@@ -91,37 +90,48 @@ export default function ProfilePage() {
     }
   }
 
-  const inputCls = `
-    w-full rounded-2xl bg-[#f3f4f6] border border-transparent px-5 py-3 text-sm text-black
-    outline-none transition focus:border-[#450043] focus:bg-white
-    disabled:opacity-50 disabled:cursor-not-allowed
-  `
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f1f1' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
       <Sidebar />
 
-      <main style={{ flex: 1, padding: '2rem 2.5rem', maxWidth: 760, overflowY: 'auto' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: '#111', margin: 0 }}>My Profile</h1>
-          <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>Manage your personal information and security settings</p>
+      <main style={{ flex: 1, padding: '2rem 2.5rem', maxWidth: 780, overflowY: 'auto' }}>
+        <div className="nova-page-header" style={{ marginBottom: '1.75rem' }}>
+          <h1 className="nova-page-title">My Profile</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+            Manage your personal information and security settings
+          </p>
         </div>
 
         {loading ? (
-          <div style={{ color: '#9ca3af', fontSize: 14 }}>Loading…</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: 14, padding: '2rem 0' }}>Loading…</div>
         ) : (
           <>
-            {/* Avatar + username chip */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: '2rem', background: 'white', borderRadius: 20, padding: '1.25rem 1.5rem', boxShadow: '0 1px 4px rgba(0,0,0,0.07)' }}>
-              <div style={{ width: 68, height: 68, borderRadius: '50%', background: 'linear-gradient(135deg, #450043, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, color: '#fff', fontWeight: 700, flexShrink: 0 }}>
+            {/* Avatar card */}
+            <div className="card-nova" style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: '1.75rem', padding: '1.5rem' }}>
+              <div style={{
+                width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                boxShadow: '0 0 20px rgba(124,58,237,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 32, color: '#fff', fontWeight: 700,
+              }}>
                 {(profile?.full_name ?? '?')[0].toUpperCase()}
               </div>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#111' }}>{profile?.full_name}</div>
-                <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>@{profile?.username}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
-                  Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : '—'}
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{profile?.full_name}</div>
+                <div style={{ marginTop: 6 }}>
+                  <span style={{
+                    display: 'inline-block', padding: '3px 10px', borderRadius: 40,
+                    background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.35)',
+                    fontSize: 12, fontWeight: 600, color: 'var(--primary)',
+                  }}>
+                    @{profile?.username}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+                  Member since {profile?.created_at
+                    ? new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+                    : '—'}
                 </div>
               </div>
             </div>
@@ -132,12 +142,8 @@ export default function ProfilePage() {
                 <button
                   key={t}
                   onClick={() => { setTab(t); setInfoMsg(null); setPwdMsg(null) }}
-                  style={{
-                    padding: '8px 22px', borderRadius: 40, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                    background: tab === t ? '#450043' : '#e5e7eb',
-                    color:      tab === t ? '#fff'    : '#374151',
-                    transition: 'all 0.2s',
-                  }}
+                  className={`nova-btn ${tab === t ? 'nova-btn-primary' : 'nova-btn-ghost'}`}
+                  style={{ padding: '8px 20px', fontSize: 13 }}
                 >
                   {t === 'info' ? 'Personal Info' : 'Change Password'}
                 </button>
@@ -146,42 +152,57 @@ export default function ProfilePage() {
 
             {/* ── Personal Info tab ── */}
             {tab === 'info' && (
-              <form onSubmit={saveInfo} style={{ background: 'white', borderRadius: 20, padding: '1.75rem', boxShadow: '0 1px 4px rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <Field label="Username" hint="Cannot be changed">
-                  <input value={profile?.username ?? ''} disabled className={inputCls} />
-                </Field>
+              <form onSubmit={saveInfo} className="card-nova" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="nova-field">
+                  <label className="nova-label">Username <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>(cannot be changed)</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      value={profile?.username ?? ''}
+                      disabled
+                      className="nova-input"
+                      style={{ paddingRight: 40, opacity: 0.5, cursor: 'not-allowed' }}
+                    />
+                    <Lock size={14} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  </div>
+                </div>
 
-                <Field label="Full Name">
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="prof-fullname">Full Name</label>
                   <input
+                    id="prof-fullname"
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
                     placeholder="Your full name"
                     required minLength={2}
-                    className={inputCls}
+                    className="nova-input"
                   />
-                </Field>
+                </div>
 
-                <Field label="Email">
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="prof-email">Email</label>
                   <input
+                    id="prof-email"
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className={inputCls}
+                    className="nova-input"
                   />
-                </Field>
+                </div>
 
-                <Field label="NIC Number">
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="prof-nic">NIC Number</label>
                   <input
+                    id="prof-nic"
                     value={nic}
                     onChange={e => setNic(e.target.value)}
                     placeholder="200112345678"
-                    className={inputCls}
+                    className="nova-input"
                   />
-                </Field>
+                </div>
 
                 {infoMsg && (
-                  <div style={{ padding: '10px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, background: infoMsg.ok ? '#dcfce7' : '#fee2e2', color: infoMsg.ok ? '#166534' : '#991b1b' }}>
+                  <div className={`nova-alert ${infoMsg.ok ? 'nova-alert-success' : 'nova-alert-error'}`}>
                     {infoMsg.ok ? '✓ ' : '✕ '}{infoMsg.text}
                   </div>
                 )}
@@ -190,7 +211,8 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={infoSaving}
-                    style={{ background: infoSaving ? '#9ca3af' : 'linear-gradient(135deg, #450043, #7c3aed)', color: '#fff', border: 'none', borderRadius: 40, padding: '10px 32px', fontWeight: 700, fontSize: 14, cursor: infoSaving ? 'not-allowed' : 'pointer' }}
+                    className="nova-btn nova-btn-primary"
+                    style={{ padding: '10px 28px', fontSize: 13, fontWeight: 700 }}
                   >
                     {infoSaving ? 'Saving…' : 'Save Changes'}
                   </button>
@@ -200,46 +222,52 @@ export default function ProfilePage() {
 
             {/* ── Change Password tab ── */}
             {tab === 'password' && (
-              <form onSubmit={savePassword} style={{ background: 'white', borderRadius: 20, padding: '1.75rem', boxShadow: '0 1px 4px rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                <Field label="Current Password">
+              <form onSubmit={savePassword} className="card-nova" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="cur-pwd">Current Password</label>
                   <input
+                    id="cur-pwd"
                     type="password"
                     value={curPwd}
                     onChange={e => setCurPwd(e.target.value)}
                     placeholder="Enter current password"
                     required
-                    className={inputCls}
+                    className="nova-input"
                   />
-                </Field>
+                </div>
 
-                <Field label="New Password" hint="Minimum 8 characters">
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="new-pwd">New Password <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>(min 8 chars)</span></label>
                   <input
+                    id="new-pwd"
                     type="password"
                     value={newPwd}
                     onChange={e => setNewPwd(e.target.value)}
                     placeholder="New password"
                     required minLength={8}
-                    className={inputCls}
+                    className="nova-input"
                   />
-                </Field>
+                </div>
 
-                <Field label="Confirm New Password">
+                <div className="nova-field">
+                  <label className="nova-label" htmlFor="con-pwd">Confirm New Password</label>
                   <input
+                    id="con-pwd"
                     type="password"
                     value={conPwd}
                     onChange={e => setConPwd(e.target.value)}
                     placeholder="Repeat new password"
                     required
-                    className={inputCls}
-                    style={{ borderColor: conPwd && newPwd !== conPwd ? '#ef4444' : undefined }}
+                    className="nova-input"
+                    style={{ borderColor: conPwd && newPwd !== conPwd ? 'var(--error)' : undefined }}
                   />
                   {conPwd && newPwd !== conPwd && (
-                    <p style={{ fontSize: 12, color: '#ef4444', marginTop: 4, paddingLeft: 4 }}>Passwords do not match</p>
+                    <p style={{ fontSize: 12, color: 'var(--error)', marginTop: 4, paddingLeft: 4 }}>Passwords do not match</p>
                   )}
-                </Field>
+                </div>
 
                 {pwdMsg && (
-                  <div style={{ padding: '10px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, background: pwdMsg.ok ? '#dcfce7' : '#fee2e2', color: pwdMsg.ok ? '#166534' : '#991b1b' }}>
+                  <div className={`nova-alert ${pwdMsg.ok ? 'nova-alert-success' : 'nova-alert-error'}`}>
                     {pwdMsg.ok ? '✓ ' : '✕ '}{pwdMsg.text}
                   </div>
                 )}
@@ -248,7 +276,8 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={pwdSaving}
-                    style={{ background: pwdSaving ? '#9ca3af' : 'linear-gradient(135deg, #450043, #7c3aed)', color: '#fff', border: 'none', borderRadius: 40, padding: '10px 32px', fontWeight: 700, fontSize: 14, cursor: pwdSaving ? 'not-allowed' : 'pointer' }}
+                    className="nova-btn nova-btn-primary"
+                    style={{ padding: '10px 28px', fontSize: 13, fontWeight: 700 }}
                   >
                     {pwdSaving ? 'Updating…' : 'Update Password'}
                   </button>
@@ -258,18 +287,6 @@ export default function ProfilePage() {
           </>
         )}
       </main>
-    </div>
-  )
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <label style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{label}</label>
-        {hint && <span style={{ fontSize: 11, color: '#9ca3af' }}>{hint}</span>}
-      </div>
-      {children}
     </div>
   )
 }

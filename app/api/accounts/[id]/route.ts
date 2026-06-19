@@ -1,7 +1,7 @@
 import { runStatement, serviceFailure } from '@/lib/platform-db'
 import { getSession } from '@/lib/session'
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const sessionId = request.headers.get('cookie')?.match(/session=([^;]+)/)?.[1]
     const session = getSession(sessionId)
@@ -10,7 +10,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       return Response.json({ ok: false, message: 'Authentication required.' }, { status: 401 })
     }
 
-    const accountId = Number(params.id)
+    const { id } = await params
+    const accountId = Number(id)
     if (!accountId) {
       return Response.json({ ok: false, message: 'Invalid account id.' }, { status: 400 })
     }
