@@ -1,4 +1,4 @@
-import { asText, runStatement, serviceFailure } from '@/lib/platform-db'
+import { asText, runStatement, serviceFailure, logAudit } from '@/lib/platform-db'
 import { createSession, sessionCookie } from '@/lib/session'
 
 export async function POST(request: Request) {
@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 
     const user = result.rows[0]
     if (!user) {
+      await logAudit('LOGIN_FAILED', { username })
       return Response.json(
         { ok: false, message: 'Invalid username or password.' },
         { status: 401 }
@@ -30,11 +31,14 @@ export async function POST(request: Request) {
 
     const valid = await Bun.password.verify(password, user.password_hash)
     if (!valid) {
+      await logAudit('LOGIN_FAILED', { username, userId: user.id })
       return Response.json(
         { ok: false, message: 'Invalid username or password.' },
         { status: 401 }
       )
     }
+
+    await logAudit('LOGIN_SUCCESS', { userId: user.id, username: user.username })
 
     const sessionId = createSession({
       userId: user.id,
