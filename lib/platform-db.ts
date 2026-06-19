@@ -25,9 +25,6 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Add face_descriptor to existing tables on first boot after migration
-ALTER TABLE users ADD COLUMN IF NOT EXISTS face_descriptor JSONB DEFAULT NULL;
-
 CREATE TABLE IF NOT EXISTS accounts (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id),
@@ -88,10 +85,17 @@ export async function runStatement(sql: string, params?: unknown[]) {
   return pool.query(sql, params as never[])
 }
 
+// Column migrations — run separately so they always apply even when
+// CREATE TABLE IF NOT EXISTS is a no-op on existing tables
+const migrations = [
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS face_descriptor JSONB DEFAULT NULL`,
+]
+
 export async function ensureDatabase() {
   if (bootPromise) return bootPromise
   bootPromise = (async () => {
     await pool.query(schema)
+    for (const m of migrations) await pool.query(m)
     await pool.query(seed)
   })()
   return bootPromise
