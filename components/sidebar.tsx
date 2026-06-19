@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 // Minimal icon components to avoid external dependency
 type IconProps = { size?: number }
@@ -95,6 +95,12 @@ const HelpCircle = ({ size = 24 }: IconProps) => (
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/login')
+  }
 
   const menuItems = [
     { label: 'DASHBOARD', path: '/dashboard' },
@@ -133,6 +139,13 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <Settings size={24} />
         <HelpCircle size={24} />
+        <button onClick={handleLogout} className="logout-btn" title="Logout">
+          <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
       </div>
 
       <style jsx>{`
@@ -219,6 +232,23 @@ export default function Sidebar() {
           gap: 1.5rem;
           padding: 1.5rem;
           color: white;
+          align-items: center;
+        }
+
+        .logout-btn {
+          background: transparent;
+          border: none;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          opacity: 0.8;
+          transition: opacity 0.2s;
+          padding: 0;
+        }
+
+        .logout-btn:hover {
+          opacity: 1;
         }
 
         @media (max-width: 768px) {
