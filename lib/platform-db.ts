@@ -9,7 +9,8 @@ export const pool = new Pool({
   max: 20
 })
 
-let booted = false
+// Boot guard: single Promise prevents concurrent schema runs on startup
+let bootPromise: Promise<void> | null = null
 
 const schema = `
 CREATE TABLE IF NOT EXISTS users (
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   user_id INTEGER NOT NULL REFERENCES users(id),
   account_number TEXT UNIQUE NOT NULL,
   account_name TEXT NOT NULL,
-  balance NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  balance NUMERIC(14, 2) NOT NULL DEFAULT 0 CHECK (balance >= 0),
   pin TEXT NOT NULL DEFAULT '0000'
 );
 
@@ -39,7 +40,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   amount NUMERIC(14, 2) NOT NULL,
   description TEXT,
   status TEXT NOT NULL DEFAULT 'SUCCESS',
-  created_by INTEGER,
+  created_by INTEGER REFERENCES users(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -49,6 +50,12 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   payload JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_from ON transactions(from_account);
+CREATE INDEX IF NOT EXISTS idx_transactions_to ON transactions(to_account);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_event ON audit_logs(event);
 `
 
 const seed = `
@@ -78,10 +85,23 @@ export async function runStatement(sql: string, params?: unknown[]) {
 }
 
 export async function ensureDatabase() {
-  if (booted) return
-  await pool.query(schema)
-  await pool.query(seed)
-  booted = true
+  if (bootPromise) return bootPromise
+  bootPromise = (async () => {
+    await pool.query(schema)
+    await pool.query(seed)
+  })()
+  return bootPromise
+}
+
+export async function logAudit(event: string, payload: Record<string, unknown> = {}) {
+  try {
+    await pool.query(
+      'INSERT INTO audit_logs (event, payload) VALUES ($1, $2)',
+      [event, JSON.stringify(payload)]
+    )
+  } catch {
+    // non-fatal — audit failures must never block the business action
+  }
 }
 
 export function asText(value: unknown) {
@@ -94,7 +114,6 @@ export function serviceFailure(reason: unknown) {
     message?: string
     code?: string
     detail?: string
-    stack?: string
   }
 
   return Response.json(

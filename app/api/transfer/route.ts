@@ -1,4 +1,4 @@
-import { pool, serviceFailure } from '@/lib/platform-db'
+import { pool, serviceFailure, logAudit } from '@/lib/platform-db'
 import { getSession } from '@/lib/session'
 
 export async function POST(request: Request) {
@@ -63,6 +63,14 @@ export async function POST(request: Request) {
     )
 
     await client.query('COMMIT')
+
+    await logAudit('TRANSFER_COMPLETED', {
+      from: fromAccount,
+      to: toAccount,
+      amount,
+      transactionId: inserted.rows[0].id,
+      userId
+    })
 
     return Response.json({ ok: true, message: 'Transfer successful.', transaction: inserted.rows[0] })
   } catch (reason) {
