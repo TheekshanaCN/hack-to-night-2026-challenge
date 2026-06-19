@@ -78,6 +78,11 @@ INSERT INTO transactions (from_account, to_account, amount, description, created
   ('1000004876', '9999999999', 10000.00, 'Totally normal fee', 1),
   ('2000006754', '1000003423', 9870.00, 'Refund maybe', 2)
 ON CONFLICT DO NOTHING;
+
+-- Reset sequences so SERIAL never collides with explicit seed IDs
+SELECT setval(pg_get_serial_sequence('users','id'), MAX(id)) FROM users;
+SELECT setval(pg_get_serial_sequence('accounts','id'), MAX(id)) FROM accounts;
+SELECT setval(pg_get_serial_sequence('transactions','id'), MAX(id)) FROM transactions;
 `
 
 export async function runStatement(sql: string, params?: unknown[]) {

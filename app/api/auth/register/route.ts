@@ -3,9 +3,11 @@ import { createSession, sessionCookie } from '@/lib/session'
 import { checkRateLimit, recordFailedAttempt } from '@/lib/rate-limit'
 
 function generateAccountNumber(userId: number): string {
+  // userId prefix guarantees no collision across users; 8 random digits handle
+  // the rare case of multiple accounts per user
   const prefix = String(userId).padStart(4, '0')
-  const suffix = String(Math.floor(1000 + Math.random() * 9000))
-  return `${prefix}${suffix}${Date.now().toString().slice(-4)}`
+  const rand   = String(Math.floor(10000000 + Math.random() * 90000000)) // 8 digits
+  return `${prefix}${rand}`
 }
 
 export async function POST(request: Request) {
@@ -87,10 +89,13 @@ export async function POST(request: Request) {
     )
   } catch (reason: unknown) {
     await client.query('ROLLBACK').catch(() => {})
-    const err = reason as { code?: string }
+    const err = reason as { code?: string; constraint?: string }
     if (err?.code === '23505') {
       recordFailedAttempt(`register:${ip}`)
-      return Response.json({ ok: false, message: 'Username already taken.' }, { status: 409 })
+      const msg = err.constraint === 'users_username_key'
+        ? 'Username already taken. Please choose another.'
+        : 'Registration failed due to a conflict. Please try again.'
+      return Response.json({ ok: false, message: msg }, { status: 409 })
     }
     return serviceFailure(reason)
   } finally {
