@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Sidebar from '../../components/sidebar'
 import { Bell, ChevronRight, Search } from '../../components/Icons'
 
@@ -41,6 +41,27 @@ export default function Dashboard() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<{ type: string; id: string; label: string; detail: string }[]>([])
+  const [searching, setSearching] = useState(false)
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const runSearch = useCallback((q: string) => {
+    if (!q.trim()) { setSearchResults([]); return }
+    setSearching(true)
+    fetch(`/api/search?q=${encodeURIComponent(q)}`)
+      .then(r => r.json())
+      .then(d => { if (d.ok) setSearchResults(d.results) })
+      .catch(() => {})
+      .finally(() => setSearching(false))
+  }, [])
+
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => runSearch(searchQuery), 300)
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current) }
+  }, [searchQuery, runSearch])
 
   useEffect(() => {
     async function load() {
@@ -86,7 +107,9 @@ export default function Dashboard() {
         <header className="content-header">
           <h1 className="page-title">Dashboard</h1>
           <div className="header-actions">
-            <Search size={24} />
+            <button onClick={() => setSearchOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}>
+              <Search size={24} />
+            </button>
             <Bell size={24} />
             <img src="/person-logo.png" alt="profile" className="avatar" />
           </div>
@@ -153,6 +176,41 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      {/* Global search modal */}
+      {searchOpen && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) { setSearchOpen(false); setSearchQuery(''); setSearchResults([]) } }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '10vh' }}
+        >
+          <div style={{ background: 'white', borderRadius: 20, width: '90%', maxWidth: 560, padding: '1.5rem', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <Search size={18} />
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search accounts, transactions…"
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: 16, color: '#111' }}
+                onKeyDown={e => e.key === 'Escape' && setSearchOpen(false)}
+              />
+              <button onClick={() => { setSearchOpen(false); setSearchQuery(''); setSearchResults([]) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#9ca3af' }}>✕</button>
+            </div>
+            <hr style={{ margin: '0 0 12px', border: 'none', borderTop: '1px solid #e5e7eb' }} />
+            {searching && <p style={{ color: '#9ca3af', fontSize: 14, padding: '0 4px' }}>Searching…</p>}
+            {!searching && searchQuery && searchResults.length === 0 && <p style={{ color: '#9ca3af', fontSize: 14, padding: '0 4px' }}>No results for &quot;{searchQuery}&quot;</p>}
+            {searchResults.map((r, i) => (
+              <div key={i} style={{ padding: '10px 4px', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 12, alignItems: 'center' }}>
+                <span style={{ fontSize: 10, background: r.type === 'account' ? '#ede9fe' : '#dcfce7', color: r.type === 'account' ? '#7c3aed' : '#15803d', padding: '2px 8px', borderRadius: 4, fontWeight: 600, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{r.type}</span>
+                <div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#111', margin: 0 }}>{r.label}</p>
+                  {r.detail && <p style={{ fontSize: 12, color: '#6b7280', margin: 0 }}>{r.detail}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .dashboard {
