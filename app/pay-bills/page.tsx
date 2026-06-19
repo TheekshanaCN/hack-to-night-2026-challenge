@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Sidebar from '../../components/sidebar'
 import {
@@ -34,8 +34,6 @@ const billers: Biller[] = [
 
 type Screen = 'select' | 'form' | 'success' | 'failed'
 
-const MOCK_BALANCE = 5000
-
 type FormErrors = {
   accountNumber?: string
   billId?: string
@@ -52,6 +50,15 @@ export default function PayBillsPage() {
   const [confirmationNumber, setConfirmationNumber] = useState('')
   const [failReason, setFailReason] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [fromAccount, setFromAccount] = useState('')
+  const [paying, setPaying] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/accounts')
+      .then(r => r.json())
+      .then(d => { if (d.ok && d.accounts?.[0]) setFromAccount(d.accounts[0].account_number) })
+      .catch(() => {})
+  }, [])
 
   function handleSelectBiller(biller: Biller) {
     setSelectedBiller(biller)
@@ -87,24 +94,34 @@ export default function PayBillsPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  function handlePayNow() {
-    if (!validateForm()) {
-      return
-    }
-
-    const amount = Number(dueAmount)
-
-    if (amount > MOCK_BALANCE) {
-      setFailReason(
-        `Insufficient Balance\nCurrent Balance is: Rs.${MOCK_BALANCE}`
-      )
+  async function handlePayNow() {
+    if (!validateForm()) return
+    setPaying(true)
+    try {
+      const res = await fetch('/api/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fromAccount,
+          toAccount: accountNumber,
+          amount: Number(dueAmount),
+          description: `Bill payment: ${selectedBiller?.name ?? 'Unknown'} | Ref: ${billId}${remarks ? ' | ' + remarks : ''}`
+        })
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setConfirmationNumber(String(data.transaction?.id ?? '—'))
+        setScreen('success')
+      } else {
+        setFailReason(data.message ?? 'Payment failed.')
+        setScreen('failed')
+      }
+    } catch {
+      setFailReason('Network error. Please try again.')
       setScreen('failed')
-      return
+    } finally {
+      setPaying(false)
     }
-
-    const confNum = Math.floor(10000000 + Math.random() * 90000000).toString()
-    setConfirmationNumber(confNum)
-    setScreen('success')
   }
 
   function resetToHome() {
@@ -240,8 +257,8 @@ export default function PayBillsPage() {
                   />
                 </div>
 
-                <button className="pay-now-btn" onClick={handlePayNow}>
-                  PAY NOW
+                <button className="pay-now-btn" onClick={handlePayNow} disabled={paying}>
+                  {paying ? 'PROCESSING…' : 'PAY NOW'}
                 </button>
               </div>
             )}

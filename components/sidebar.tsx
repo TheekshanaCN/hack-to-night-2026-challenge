@@ -137,7 +137,9 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-footer">
-        <Settings size={24} />
+        <Link href="/profile" title="Profile & Settings">
+          <Settings size={24} />
+        </Link>
         <HelpCircle size={24} />
         <button onClick={handleLogout} className="logout-btn" title="Logout">
           <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">

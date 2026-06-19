@@ -9,7 +9,8 @@ export const pool = new Pool({
   max: 20
 })
 
-let booted = false
+// Boot guard: single Promise prevents concurrent schema runs on startup
+let bootPromise: Promise<void> | null = null
 
 const schema = `
 CREATE TABLE IF NOT EXISTS users (
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   full_name TEXT NOT NULL,
   nic TEXT,
   email TEXT,
+  face_descriptor JSONB DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -28,7 +30,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   user_id INTEGER NOT NULL REFERENCES users(id),
   account_number TEXT UNIQUE NOT NULL,
   account_name TEXT NOT NULL,
-  balance NUMERIC(14, 2) NOT NULL DEFAULT 0,
+  balance NUMERIC(14, 2) NOT NULL DEFAULT 0 CHECK (balance >= 0),
   pin TEXT NOT NULL DEFAULT '0000'
 );
 
@@ -39,7 +41,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   amount NUMERIC(14, 2) NOT NULL,
   description TEXT,
   status TEXT NOT NULL DEFAULT 'SUCCESS',
-  created_by INTEGER,
+  created_by INTEGER REFERENCES users(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -49,6 +51,12 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   payload JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_from ON transactions(from_account);
+CREATE INDEX IF NOT EXISTS idx_transactions_to ON transactions(to_account);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_event ON audit_logs(event);
 `
 
 const seed = `
@@ -70,6 +78,11 @@ INSERT INTO transactions (from_account, to_account, amount, description, created
   ('1000004876', '9999999999', 10000.00, 'Totally normal fee', 1),
   ('2000006754', '1000003423', 9870.00, 'Refund maybe', 2)
 ON CONFLICT DO NOTHING;
+
+-- Reset sequences so SERIAL never collides with explicit seed IDs
+SELECT setval(pg_get_serial_sequence('users','id'), MAX(id)) FROM users;
+SELECT setval(pg_get_serial_sequence('accounts','id'), MAX(id)) FROM accounts;
+SELECT setval(pg_get_serial_sequence('transactions','id'), MAX(id)) FROM transactions;
 `
 
 export async function runStatement(sql: string, params?: unknown[]) {
@@ -77,11 +90,31 @@ export async function runStatement(sql: string, params?: unknown[]) {
   return pool.query(sql, params as never[])
 }
 
+// Column migrations — run separately so they always apply even when
+// CREATE TABLE IF NOT EXISTS is a no-op on existing tables
+const migrations = [
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS face_descriptor JSONB DEFAULT NULL`,
+]
+
 export async function ensureDatabase() {
-  if (booted) return
-  await pool.query(schema)
-  await pool.query(seed)
-  booted = true
+  if (bootPromise) return bootPromise
+  bootPromise = (async () => {
+    await pool.query(schema)
+    for (const m of migrations) await pool.query(m)
+    await pool.query(seed)
+  })()
+  return bootPromise
+}
+
+export async function logAudit(event: string, payload: Record<string, unknown> = {}) {
+  try {
+    await pool.query(
+      'INSERT INTO audit_logs (event, payload) VALUES ($1, $2)',
+      [event, JSON.stringify(payload)]
+    )
+  } catch {
+    // non-fatal — audit failures must never block the business action
+  }
 }
 
 export function asText(value: unknown) {
@@ -94,7 +127,6 @@ export function serviceFailure(reason: unknown) {
     message?: string
     code?: string
     detail?: string
-    stack?: string
   }
 
   return Response.json(
