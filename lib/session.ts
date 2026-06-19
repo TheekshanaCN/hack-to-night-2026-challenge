@@ -58,6 +58,12 @@ export function markFaceVerified(id: string): void {
   if (session) session.faceVerified = true
 }
 
+export function updateSession(userId: number, patch: Partial<Pick<SessionData, 'fullName'>>): void {
+  for (const session of store.values()) {
+    if (session.userId === userId) Object.assign(session, patch)
+  }
+}
+
 export function deleteSession(id: string | null | undefined): void {
   if (id) store.delete(id)
 }
